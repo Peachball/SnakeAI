@@ -95,7 +95,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     private static double penRadius;
 
     // show we draw immediately or wait until next show?
-    private static boolean defer = false;
+    private static boolean defer = true;
 
     // boundary of drawing canvas, 5% border
     private static final double BORDER = 0.05;
@@ -868,6 +868,12 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     public static void show() {
         defer = false;
         draw();
+    }
+    
+    public static void showFrame(){
+        defer = false;
+        draw();
+        defer = true;
     }
 
     // draw onscreen if defer is false
