@@ -21,16 +21,20 @@ public class Board {
         snake1 = new Snake();
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
-        snake1.snakeLength = 1;
+        snake1.snakeLength = 15;
         snake1.snakeDirection = 1;
         StdDraw.showFrame();
         speed = 100;
         appleGenerator = false;
     }
 
+    /**
+     *
+     * @param snake
+     * @param direction
+     */
     public void setDirection(Snake snake, int direction) {
         if (snake.snakeDirection % 2 == direction % 2) {
-            return;
         } else {
             snake.snakeDirection = direction;
         }
@@ -54,15 +58,19 @@ public class Board {
             case 3:
                 snake1.snakeY--;   //3 down
                 if (snake1.snakeY < 0) {
-                    snake1.snakeY = board.length + snake1.snakeY - 1;
+                    snake1.snakeY = board.length + snake1.snakeY;
                 }
                 break;
             case 4:
                 snake1.snakeX--;   //4 left
                 if (snake1.snakeX < 0) {
-                    snake1.snakeX = board[0].length + snake1.snakeX - 1;
+                    snake1.snakeX = board[0].length + snake1.snakeX;
                 }
                 break;
+        }
+        if (board[snake1.snakeY][snake1.snakeX] == -1) {
+            snake1.snakeLength++;
+            apple = false;
         }
 
         //Set nonsnake parts to be white:
@@ -72,11 +80,19 @@ public class Board {
                 if (board[counterY][counterX] == 0 || board[counterY][counterX] == -1) {
                     board[counterY][counterX] = 0;
                     fillRectangle(counterX, counterY, 2);
+                    continue;
                 }
                 if (board[counterY][counterX] == -2) {
+                    fillRectangle(counterX, counterY, 3);
                     board[counterY][counterX]++;
+                    continue;
                 }
-                if (board[counterY][counterX] > 0) {
+                if (board[counterY][counterX] > 0 && apple) {
+                    fillRectangle(counterX, counterY, 1);
+                    continue;
+                }
+                if (board[counterY][counterX] > 0 && !apple) {
+                    board[counterY][counterX]++;
                     fillRectangle(counterX, counterY, 1);
                 }
             }
@@ -86,10 +102,7 @@ public class Board {
         if (board[snake1.snakeY][snake1.snakeX] > 0) {
             endGame(false);
         }
-        if (board[snake1.snakeY][snake1.snakeX] == -1) {
-            snake1.snakeLength++;
-            apple = false;
-        }
+
         if (appleGenerator && !apple) {
             generateApple();
         }
@@ -126,13 +139,28 @@ public class Board {
         System.exit(0);
     }
 
-    public void generateApple() {
-        appleX = (int) (Math.random() * board[0].length);
-        appleY = (int) (Math.random() * board.length);
-        int counter = 0;
-        while (board[appleY][appleX] > 0) {
-            appleX = (int) (Math.random() * board[0].length);
-            appleY = (int) (Math.random() * board.length);
+    public void generateApple() { //Remeber to add a function to place an apple that's not random
+        int randomNum = (int) (Math.random() * board[0].length * board.length);
+        boolean status = false;
+        for (int counterX = 0; counterX < board[0].length; counterX++) {
+            for (int counterY = 0; counterY < board.length; counterY++) {
+                if (board[counterY][counterX] > 0) {
+                    continue;
+                }
+                randomNum--;
+                if (randomNum <= 0 && !(board[counterY][counterX] > 0)) {
+                    appleY = counterY;
+                    appleX = counterX;
+                    status = true;
+                    break;
+                }
+            }
+            if (status) {
+                break;
+            }
+            if (counterX == board[0].length - 1) {
+                counterX = 0;
+            }
         }
         board[appleY][appleX] = -1;
         fillRectangle(appleX, appleY, 3);
