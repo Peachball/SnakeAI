@@ -54,13 +54,13 @@ public class Board {
             case 3:
                 snake1.snakeY--;   //3 down
                 if (snake1.snakeY < 0) {
-                    snake1.snakeY = board.length + snake1.snakeY-1;
+                    snake1.snakeY = board.length + snake1.snakeY - 1;
                 }
                 break;
             case 4:
                 snake1.snakeX--;   //4 left
                 if (snake1.snakeX < 0) {
-                    snake1.snakeX = board[0].length + snake1.snakeX-1;
+                    snake1.snakeX = board[0].length + snake1.snakeX - 1;
                 }
                 break;
         }
@@ -76,8 +76,8 @@ public class Board {
                 if (board[counterY][counterX] == -2) {
                     board[counterY][counterX]++;
                 }
-                if(board[counterY][counterX]>0){
-                    fillRectangle(counterX,counterY,1);
+                if (board[counterY][counterX] > 0) {
+                    fillRectangle(counterX, counterY, 1);
                 }
             }
         }
@@ -90,7 +90,7 @@ public class Board {
             snake1.snakeLength++;
             apple = false;
         }
-        if(appleGenerator&&!apple){
+        if (appleGenerator && !apple) {
             generateApple();
         }
         fillRectangle(snake1.snakeX, snake1.snakeY, 4);
@@ -129,12 +129,13 @@ public class Board {
     public void generateApple() {
         appleX = (int) (Math.random() * board[0].length);
         appleY = (int) (Math.random() * board.length);
+        int counter = 0;
         while (board[appleY][appleX] > 0) {
             appleX = (int) (Math.random() * board[0].length);
             appleY = (int) (Math.random() * board.length);
         }
         board[appleY][appleX] = -1;
-        fillRectangle(appleX,appleY,3);
+        fillRectangle(appleX, appleY, 3);
         apple = true;
     }
 }
