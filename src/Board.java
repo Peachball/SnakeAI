@@ -1,14 +1,12 @@
 public class Board {
 
     public int[][] board;
-    public int snakeDirection;
-    public int snakeLength;
-    public int snakeX;
-    public int snakeY;
     public int appleX;
     public int appleY;
     public boolean apple;
     public int speed;
+    public Snake snake1;
+    public boolean appleGenerator;
 
     public Board(int x, int y) {
 
@@ -20,72 +18,106 @@ public class Board {
         StdDraw.filledRectangle(x / 2, y / 2, x / 2, y / 2);
 
         //Initialize the Snake
-        snakeX = (int) x / 2;
-        snakeY = (int) y / 2;
-        snakeLength = 16;
-        snakeDirection = 1;
+        snake1 = new Snake();
+        snake1.snakeX = (int) x / 2;
+        snake1.snakeY = (int) y / 2;
+        snake1.snakeLength = 1;
+        snake1.snakeDirection = 1;
         StdDraw.showFrame();
-        speed = 200;
+        speed = 100;
+        appleGenerator = false;
     }
-    
+
+    public void setDirection(Snake snake, int direction) {
+        if (snake.snakeDirection % 2 == direction % 2) {
+            return;
+        } else {
+            snake.snakeDirection = direction;
+        }
+    }
+
     public void nextIteration() {
         //Create new areas for the snake
-        switch (snakeDirection) {
+        switch (snake1.snakeDirection) {
             case 1:
-                snakeY++;   //1 up
-                if (snakeY >= board.length) {
-                    snakeY = board.length - snakeY;
+                snake1.snakeY++;   //1 up
+                if (snake1.snakeY >= board.length) {
+                    snake1.snakeY = board.length - snake1.snakeY;
                 }
                 break;
             case 2:
-                snakeX++;   //2 right
-                if (snakeX >= board[0].length) {
-                    snakeX = board.length - snakeX;
+                snake1.snakeX++;   //2 right
+                if (snake1.snakeX >= board[0].length) {
+                    snake1.snakeX = board.length - snake1.snakeX;
                 }
                 break;
             case 3:
-                snakeY--;   //3 down
-                if (snakeY <= 0) {
-                    snakeY = board.length + snakeY;
+                snake1.snakeY--;   //3 down
+                if (snake1.snakeY < 0) {
+                    snake1.snakeY = board.length + snake1.snakeY-1;
                 }
                 break;
             case 4:
-                snakeX--;   //4 left
-                if (snakeX <= 0) {
-                    snakeX = board[0].length + snakeX;
+                snake1.snakeX--;   //4 left
+                if (snake1.snakeX < 0) {
+                    snake1.snakeX = board[0].length + snake1.snakeX-1;
                 }
                 break;
         }
-        if(board[snakeY][snakeX] > 0){
-            endGame(false);
-        }
-        fillRectangle(snakeX, snakeY, true);
-        board[snakeY][snakeX] = snakeLength;
 
         //Set nonsnake parts to be white:
         for (int counterX = 0; counterX < board[0].length; counterX++) {
             for (int counterY = 0; counterY < board.length; counterY++) {
                 board[counterY][counterX]--;
-                if (board[counterY][counterX] <= 0) {
+                if (board[counterY][counterX] == 0 || board[counterY][counterX] == -1) {
                     board[counterY][counterX] = 0;
-                    fillRectangle(counterX, counterY, false);
+                    fillRectangle(counterX, counterY, 2);
+                }
+                if (board[counterY][counterX] == -2) {
+                    board[counterY][counterX]++;
+                }
+                if(board[counterY][counterX]>0){
+                    fillRectangle(counterX,counterY,1);
                 }
             }
         }
+
+        //Death Checker+Other misc checkers
+        if (board[snake1.snakeY][snake1.snakeX] > 0) {
+            endGame(false);
+        }
+        if (board[snake1.snakeY][snake1.snakeX] == -1) {
+            snake1.snakeLength++;
+            apple = false;
+        }
+        if(appleGenerator&&!apple){
+            generateApple();
+        }
+        fillRectangle(snake1.snakeX, snake1.snakeY, 4);
+        board[snake1.snakeY][snake1.snakeX] = snake1.snakeLength;
         StdDraw.show(speed);
     }
 
-    public void fillRectangle(int x, int y, boolean status) {
-        if (status) {
-            StdDraw.setPenColor(StdDraw.BLACK);
-        } else {
-            StdDraw.setPenColor(StdDraw.WHITE);
+    public void fillRectangle(int x, int y, int status) {
+        switch (status) {
+            case 1:
+                StdDraw.setPenColor(StdDraw.BLACK); //Snake Body Color
+                break;
+            case 2:
+                StdDraw.setPenColor(StdDraw.WHITE); //No snake color
+                break;
+            case 3:
+                StdDraw.setPenColor(StdDraw.RED); //Apple Color
+                break;
+            case 4:
+                StdDraw.setPenColor(StdDraw.DARK_GRAY);// Snake Head color
+                break;
         }
-        StdDraw.filledRectangle(x, y, .5, .5);
+        StdDraw.filledRectangle(x, y, .45, .45);
     }
 
     public void endGame(boolean status) {
-        System.out.println("You got " + snakeLength + " points");
+        System.out.println("You got " + snake1.snakeLength + " points");
         if (status) {
             System.out.println("You win!");
         } else {
@@ -101,6 +133,23 @@ public class Board {
             appleX = (int) (Math.random() * board[0].length);
             appleY = (int) (Math.random() * board.length);
         }
+        board[appleY][appleX] = -1;
+        fillRectangle(appleX,appleY,3);
         apple = true;
+    }
+}
+
+class Snake {
+
+    public int snakeX;
+    public int snakeY;
+    public int snakeLength;
+    public int snakeDirection;
+
+    public Snake() {
+        snakeX = 0;
+        snakeY = 0;
+        snakeLength = 1;
+        snakeDirection = 1;
     }
 }
