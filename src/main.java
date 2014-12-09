@@ -75,8 +75,8 @@ public class main {
         return Math.abs(board.snake1.snakeX - x) + Math.abs(board.snake1.snakeY - y);
     }
 
-    static double shortestPath(Board board, Coord location) {
-        return Math.abs(board.snake1.snakeX - location.x) + Math.abs(board.snake1.snakeY - location.y);
+    static double shortestPath(Board board, Coord location1, Coord location2) {
+        return Math.abs(location2.x - location1.x) + Math.abs(location2.y - location1.y);
     }
 
     static void normalMode(Board board) {
@@ -96,6 +96,7 @@ public class main {
             int shortestDirection = board.snake1.snakeDirection;
             boolean idleState = false;
             Coord buffer;
+            Coord snakeCoord = new Coord(board.snake1.snakeX,board.snake1.snakeY);
 
             //Speed Settings
             if (StdDraw.hasNextKeyTyped()) {
@@ -121,10 +122,9 @@ public class main {
 
             //Check which direction has shortest route: (F = G + H, the G cost)
             for (int counter = 0; counter < 4; counter++) {
-
                 if (!board.isSnake(newCoord(board, counter+1, board.snake1.snakeX, board.snake1.snakeY))) {
-                    shortestDistance[counter] = (int) shortestPath(board, newCoord(board,
-                            counter+1, board.appleX, board.appleY));
+                    shortestDistance[counter] = (int) shortestPath(board, 
+                           newCoord(board,counter+1,snakeCoord) ,new Coord(board.appleX,board.appleY));
                 }
                 if (board.isSnake(newCoord(board, counter+1, board.snake1.snakeX, board.snake1.snakeY))) {
                     shortestDistance[counter] = 1000000;
