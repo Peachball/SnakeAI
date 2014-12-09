@@ -21,7 +21,7 @@ public class Board {
         snake1 = new Snake();
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
-        snake1.snakeLength = 15;
+        snake1.snakeLength = 1;
         snake1.snakeDirection = 1;
         StdDraw.showFrame();
         speed = 100;
@@ -39,7 +39,18 @@ public class Board {
             snake.snakeDirection = direction;
         }
     }
-
+    public boolean isSnake(int x, int y){
+        if(board[y][x] >0){
+            return true;
+        }
+        return false;
+    }
+    public boolean isSnake(Coord coord){
+        if(board[coord.y][coord.x] >0){
+            return true;
+        }
+        return false;
+    }
     public void nextIteration() {
         //Create new areas for the snake
         switch (snake1.snakeDirection) {
@@ -72,7 +83,9 @@ public class Board {
             snake1.snakeLength++;
             apple = false;
         }
-
+        if (snake1.snakeLength == board.length * board[0].length) {
+            endGame(true);
+        }
         //Set nonsnake parts to be white:
         for (int counterX = 0; counterX < board[0].length; counterX++) {
             for (int counterY = 0; counterY < board.length; counterY++) {
@@ -83,17 +96,17 @@ public class Board {
                     continue;
                 }
                 if (board[counterY][counterX] == -2) {
-                    fillRectangle(counterX, counterY, 3);
+//                    fillRectangle(counterX, counterY, 3);
                     board[counterY][counterX]++;
                     continue;
                 }
                 if (board[counterY][counterX] > 0 && apple) {
-                    fillRectangle(counterX, counterY, 1);
+//                    fillRectangle(counterX, counterY, 1);
                     continue;
                 }
                 if (board[counterY][counterX] > 0 && !apple) {
                     board[counterY][counterX]++;
-                    fillRectangle(counterX, counterY, 1);
+//                    fillRectangle(counterX, counterY, 1);
                 }
             }
         }
@@ -102,12 +115,12 @@ public class Board {
         if (board[snake1.snakeY][snake1.snakeX] > 0) {
             endGame(false);
         }
-
+        fillRectangle(snake1.snakeX, snake1.snakeY, 4);
+        board[snake1.snakeY][snake1.snakeX] = snake1.snakeLength;
         if (appleGenerator && !apple) {
             generateApple();
         }
-        fillRectangle(snake1.snakeX, snake1.snakeY, 4);
-        board[snake1.snakeY][snake1.snakeX] = snake1.snakeLength;
+
         StdDraw.show(speed);
     }
 
@@ -140,7 +153,7 @@ public class Board {
     }
 
     public void generateApple() { //Remeber to add a function to place an apple that's not random
-        int randomNum = (int) (Math.random() * board[0].length * board.length);
+        int randomNum = (int) (Math.random() * (board[0].length * board.length - snake1.snakeLength));
         boolean status = false;
         for (int counterX = 0; counterX < board[0].length; counterX++) {
             for (int counterY = 0; counterY < board.length; counterY++) {
