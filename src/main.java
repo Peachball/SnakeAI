@@ -92,12 +92,6 @@ public class main {
         LinkedList<Coord> closedList = new LinkedList<Coord>();
         while (true) {
 
-            int shortestDistance[] = new int[4];
-            int shortestDirection = board.snake1.snakeDirection;
-            boolean idleState = false;
-            Coord buffer;
-            Coord snakeCoord = new Coord(board.snake1.snakeX,board.snake1.snakeY);
-
             //Speed Settings
             if (StdDraw.hasNextKeyTyped()) {
                 switch (StdDraw.nextKeyTyped()) {
@@ -119,28 +113,13 @@ public class main {
                         board.speed = 150;
                 }
             }
+            for (int counter = 0; counter < 4; counter++) {
+                if (counter + 1 != board.snake1.snakeDirection && 
+                        (counter + 1) % 2 == board.snake1.snakeDirection % 2) {
+                    
+                }
+            }
 
-            //Check which direction has shortest route: (F = G + H, the G cost)
-            for (int counter = 0; counter < 4; counter++) {
-                if (!board.isSnake(newCoord(board, counter+1, board.snake1.snakeX, board.snake1.snakeY))) {
-                    shortestDistance[counter] = (int) shortestPath(board, 
-                           newCoord(board,counter+1,snakeCoord) ,new Coord(board.appleX,board.appleY));
-                }
-                if (board.isSnake(newCoord(board, counter+1, board.snake1.snakeX, board.snake1.snakeY))) {
-                    shortestDistance[counter] = 1000000;
-                }
-            }
-            int minDistance = shortestDistance[0];
-            int minCounter = 0;
-            for (int counter = 0; counter < 4; counter++) {
-                if (minDistance > shortestDistance[counter]) {
-                    minDistance = shortestDistance[counter];
-                    minCounter = counter;
-                }
-            }
-            board.setDirection(board.snake1, minCounter+1);
-            board.nextIteration();
-            
         }
 
     }
