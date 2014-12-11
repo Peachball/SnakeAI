@@ -1,3 +1,4 @@
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -6,7 +7,7 @@ public class main {
 
     public static void main(String[] args) {
         int decision;
-        Board board = new Board(16, 16);
+        Board board = new Board(30, 30);
         board.appleGenerator = true;
         System.out.println("Choose your game mode:");
         System.out.println("1:Normal player mode");
@@ -89,7 +90,8 @@ public class main {
     }
 
     static void GreedySearch(Board board) {
-        LinkedList<Coord> closedList = new LinkedList<Coord>();
+        int[][] distances = new int[board.board.length][board.board[0].length];
+        int distanceTraveled = 0;
         while (true) {
 
             //Speed Settings
@@ -113,16 +115,82 @@ public class main {
                         board.speed = 150;
                 }
             }
+            distanceTraveled++;
+            //Mark the death regions:
+            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+                for (int counterY = 0; counterY < board.board.length; counterY++) {
+                    if (isSnake(board, counterX, counterY)) {
+                        distances[counterY][counterX] = -1;
+                        continue;
+                    }
+                    if (checkDeadEnd(board, new Coord(counterX, counterY))) {
+                        distances[counterY][counterX] = -1;
+
+                        while (true) {
+
+                        }
+                    }
+
+                }
+            }
             for (int counter = 0; counter < 4; counter++) {
-                if (counter + 1 != board.snake1.snakeDirection && 
-                        (counter + 1) % 2 == board.snake1.snakeDirection % 2) {
-                    
+                if (counter + 1 != board.snake1.snakeDirection
+                        && (counter + 1) % 2 == board.snake1.snakeDirection % 2) {
+                    continue;
+                }
+                if (distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x] != -1
+                        && distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x]
+                        < shortestPath(board, newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)),
+                                new Coord(board.appleX, board.appleY))) { //The regret is so real...
+                    distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x]
+                            += distanceTraveled + shortestPath(board, newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)),
+                                    new Coord(board.appleX, board.appleY));
                 }
             }
 
         }
 
     }
+
+    static boolean checkDeadEnd(Board board, Coord coord) {
+        short numofConnections = 0;
+        for (int counter = 0; counter < 4; counter++) {
+            if (isSnake(board, newCoord(board, counter + 1, coord))) {
+                numofConnections++;
+            }
+        }
+        if (numofConnections > 2) {
+            return true;
+        }
+        return false;
+    }
+
+    static int checkDeadEnd(Board board, Coord coord) {
+        short numofConnections = 0;
+        short[] connections = new short[4];
+        for (int counter = 0; counter < 4; counter++) {
+            if (isSnake(board, newCoord(board, counter + 1, coord))) {
+                numofConnections++;
+            }
+            else{
+                
+            }
+        }
+        if (numofConnections > 2) {
+        }
+        return -1;
+    }
+
+    static boolean isSnake(Board board, int x, int y) {
+        return board.board[y][x] > 0;
+    }
+
+    static boolean isSnake(Board board, Coord coord) {
+        return board.board[coord.y][coord.x] > 0;
+    }
+    /*
+     * Directionally based, not for the distance
+     */
 
     static Coord newCoord(Board board, int direction, Coord coord) {
         switch (direction) {
