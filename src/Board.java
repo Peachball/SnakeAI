@@ -1,5 +1,6 @@
 public class Board {
-
+    //Apple is represented on the board as -1
+    //Snake is represented on the board as how many iterations it will stay on the board
     public int[][] board;
     public int appleX;
     public int appleY;

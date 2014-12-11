@@ -1,4 +1,3 @@
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -93,7 +92,8 @@ public class main {
         int[][] distances = new int[board.board.length][board.board[0].length];
         int distanceTraveled = 0;
         while (true) {
-
+            Coord buffer;
+            Coord snake;
             //Speed Settings
             if (StdDraw.hasNextKeyTyped()) {
                 switch (StdDraw.nextKeyTyped()) {
@@ -126,10 +126,24 @@ public class main {
                 }
             }
 
+            //Mark each place on board with distance to apple
+            snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
+            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+
+                for (int counterY = 0; counterY < board.board.length; counterY++) {
+
+                    if (isSnake(board, counterX, counterY)) {
+                        distances[counterY][counterX] = -board.board[counterY][counterX];
+                    }
+                    distances[counterY][counterX] += shortestPath(board, new Coord(counterX, counterY), snake);
+                }
+            }
+            
+            //Mark each point with closest distance to previous point (Dijkstras method first)
+            
         }
 
     }
-
 
     static boolean isSnake(Board board, int x, int y) {
         return board.board[y][x] > 0;
