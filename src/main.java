@@ -123,28 +123,6 @@ public class main {
                         distances[counterY][counterX] = -1;
                         continue;
                     }
-                    if (checkDeadEnd(board, new Coord(counterX, counterY))) {
-                        distances[counterY][counterX] = -1;
-
-                        while (true) {
-
-                        }
-                    }
-
-                }
-            }
-            for (int counter = 0; counter < 4; counter++) {
-                if (counter + 1 != board.snake1.snakeDirection
-                        && (counter + 1) % 2 == board.snake1.snakeDirection % 2) {
-                    continue;
-                }
-                if (distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x] != -1
-                        && distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x]
-                        < shortestPath(board, newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)),
-                                new Coord(board.appleX, board.appleY))) { //The regret is so real...
-                    distances[newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).y][newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)).x]
-                            += distanceTraveled + shortestPath(board, newCoord(board, counter + 1, new Coord(board.snake1.snakeX, board.snake1.snakeY)),
-                                    new Coord(board.appleX, board.appleY));
                 }
             }
 
@@ -152,34 +130,6 @@ public class main {
 
     }
 
-    static boolean checkDeadEnd(Board board, Coord coord) {
-        short numofConnections = 0;
-        for (int counter = 0; counter < 4; counter++) {
-            if (isSnake(board, newCoord(board, counter + 1, coord))) {
-                numofConnections++;
-            }
-        }
-        if (numofConnections > 2) {
-            return true;
-        }
-        return false;
-    }
-
-    static int checkDeadEnd(Board board, Coord coord) {
-        short numofConnections = 0;
-        short[] connections = new short[4];
-        for (int counter = 0; counter < 4; counter++) {
-            if (isSnake(board, newCoord(board, counter + 1, coord))) {
-                numofConnections++;
-            }
-            else{
-                
-            }
-        }
-        if (numofConnections > 2) {
-        }
-        return -1;
-    }
 
     static boolean isSnake(Board board, int x, int y) {
         return board.board[y][x] > 0;
