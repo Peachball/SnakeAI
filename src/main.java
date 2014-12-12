@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -90,7 +91,7 @@ public class main {
     static void GreedySearch(Board board) {
         int[][] distances = new int[board.board.length][board.board[0].length];
         int distanceTraveled = 0;
-        ArrayList<Integer> distanceFromStart = new ArrayList<Integer>();
+        ArrayList<Integer> directions = new ArrayList<Integer>();
         while (true) {
             Coord buffer;
             Coord snake;
@@ -139,11 +140,27 @@ public class main {
                 }
             }
             //Mark each point with closest distance to previous point (Dijkstras method first)
-            
+
             //Add the point that is closest to the apple into the list:
             int counterX = -1;
             int counterY = -1;
-            
+            Coord distanceTester;
+            int min;
+            int direction;
+
+            while (counterX != board.appleX && counterY != board.appleY) {
+                min = 10000;
+                for (int counter = 0; counter < 4; counter++) {
+                    buffer = newCoord(board, counter + 1, board.snake1.snakeX, board.snake1.snakeY);
+                    distanceTester = buffer;
+                    if (shortestPath(board, buffer, new Coord(board.appleX, board.appleY)) <= min) {
+                        min = (int) shortestPath(board, buffer, new Coord(board.appleX, board.appleY));
+                        direction = counter+1;
+                        directions.add(direction);
+                    }
+                }
+            }
+
         }
 
     }
