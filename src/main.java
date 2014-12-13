@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -92,6 +91,7 @@ public class main {
         int[][] distances = new int[board.board.length][board.board[0].length];
         int distanceTraveled = 0;
         ArrayList<Integer> directions = new ArrayList<Integer>();
+        board.nextIteration();
         while (true) {
             Coord buffer;
             Coord snake;
@@ -147,20 +147,30 @@ public class main {
             Coord distanceTester;
             int min;
             int direction;
-
+            distanceTester = new Coord(board.snake1.snakeX, board.snake1.snakeY);
             while (counterX != board.appleX && counterY != board.appleY) {
                 min = 10000;
+                direction = board.snake1.snakeDirection;
                 for (int counter = 0; counter < 4; counter++) {
-                    buffer = newCoord(board, counter + 1, board.snake1.snakeX, board.snake1.snakeY);
-                    distanceTester = buffer;
-                    if (shortestPath(board, buffer, new Coord(board.appleX, board.appleY)) <= min) {
+                    buffer = newCoord(board, counter + 1, distanceTester);
+                    if (shortestPath(board, buffer, new Coord(board.appleX, board.appleY)) <= min
+                            && (direction % 2 == board.snake1.snakeDirection % 2
+                            || direction == board.snake1.snakeDirection)) {
                         min = (int) shortestPath(board, buffer, new Coord(board.appleX, board.appleY));
-                        direction = counter+1;
-                        directions.add(direction);
+                        direction = counter + 1;
+                        counterX = buffer.x;
+                        counterY = buffer.y;
                     }
                 }
+                distanceTester = newCoord(board, direction, new Coord(counterX, counterY));
+                directions.add(direction);
             }
 
+            //Go on the path
+            for (int counter = 0; counter < directions.size(); counter++) {
+                board.setDirection(board.snake1, directions.get(counter));
+                board.nextIteration();
+            }
         }
 
     }
@@ -264,5 +274,13 @@ class Coord {
     public Coord(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public int getX() {
+        return this.x;
+    }
+
+    public int getY() {
+        return this.y;
     }
 }
