@@ -22,7 +22,7 @@ public class Board {
         snake1 = new Snake();
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
-        snake1.snakeLength = 1;
+        snake1.snakeLength = 108;
         snake1.snakeDirection = 1;
         StdDraw.showFrame();
         speed = 100;
