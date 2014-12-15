@@ -8,6 +8,7 @@ public class Board {
     public int speed;
     public Snake snake1;
     public boolean appleGenerator;
+    public boolean saves;
 
     public Board(int x, int y) {
 
@@ -27,8 +28,11 @@ public class Board {
         StdDraw.showFrame();
         speed = 100;
         appleGenerator = false;
+        saves = false;
     }
-
+public void setSaveState(boolean status){
+    saves = status;
+}
     /**
      *
      * @param snake
