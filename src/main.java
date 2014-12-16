@@ -5,14 +5,17 @@ public class main {
 
     public static void main(String[] args) {
         int decision;
-        Board board = new Board(30, 30);
+        Scanner in = new Scanner(System.in);
+        Board board = new Board(15, 15);
         board.appleGenerator = true;
+        System.out.println("Write your name");
+        board.player = in.nextLine();
         System.out.println("Choose your game mode:");
         System.out.println("1:Normal player mode");
         System.out.println("2:Simple AI mode");
         System.out.println("3: Super Simple Greedy AI mode (still in development)");
         System.out.println("4: Another AI that I plan to write in the future...");
-        Scanner in = new Scanner(System.in);
+
         decision = Integer.parseInt(in.nextLine());
         switch (decision) {
             case 1:

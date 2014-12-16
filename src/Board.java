@@ -1,4 +1,19 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Board {
+
     //Apple is represented on the board as -1
     //Snake is represented on the board as how many iterations it will stay on the board
     public int[][] board;
@@ -9,6 +24,8 @@ public class Board {
     public Snake snake1;
     public boolean appleGenerator;
     public boolean saves;
+    public ArrayList<Person> people;
+    public String player;
 
     public Board(int x, int y) {
 
@@ -23,16 +40,63 @@ public class Board {
         snake1 = new Snake();
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
-        snake1.snakeLength = 108;
+        snake1.snakeLength = 1;
         snake1.snakeDirection = 1;
         StdDraw.showFrame();
         speed = 100;
         appleGenerator = false;
         saves = false;
+        people = new ArrayList<Person>();
+        player = "PEACHBALL";
     }
-public void setSaveState(boolean status){
-    saves = status;
-}
+
+    public void setSaveState(boolean status) {
+        saves = status;
+    }
+
+    public void saveScore(String name, int score) {
+        try {
+            BufferedReader in = new BufferedReader(new FileReader("stats.txt"));
+            PrintWriter out = new PrintWriter(new FileWriter("stats.txt"));
+            String buffer = in.readLine();
+            StringTokenizer reader;
+            int counter = 0;
+            while (buffer != null) {
+                reader = new StringTokenizer(buffer);
+                people.add(new Person(reader.nextToken(), Integer.parseInt(reader.nextToken())));
+                buffer = in.readLine();
+            }
+            if (people.size() > 0) {
+                Collections.sort(people, new NameComparator());
+                if (Collections.binarySearch(people, new Person(name, score), new NameComparator()) >= 0) {
+                    if (people.get(Collections.binarySearch(people, new Person(name, score), new NameComparator())).score < score) {
+                        people.set(Collections.binarySearch(people, new Person(name, score), new NameComparator()), new Person(name,score));
+                    }
+                } else {
+                    people.add(new Person(name, score));
+                }
+            } else {
+                people.add(new Person(name, score));
+            }
+            for (counter = 0; counter < people.size(); counter++) {
+                out.println(people.get(counter).name + " " + people.get(counter).score);
+            }
+            out.close();
+        } catch (IOException | NumberFormatException e) {
+            try {
+                PrintWriter out = new PrintWriter("stats.txt", "UTF-8");
+                out.println(name + " " + score);
+                out.close();
+            } catch (FileNotFoundException | UnsupportedEncodingException ex) {
+                Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void setLength(int x) {
+        snake1.snakeLength = x;
+    }
+
     /**
      *
      * @param snake
@@ -44,18 +108,21 @@ public void setSaveState(boolean status){
             snake.snakeDirection = direction;
         }
     }
-    public boolean isSnake(int x, int y){
-        if(board[y][x] >0){
+
+    public boolean isSnake(int x, int y) {
+        if (board[y][x] > 0) {
             return true;
         }
         return false;
     }
-    public boolean isSnake(Coord coord){
-        if(board[coord.y][coord.x] >0){
+
+    public boolean isSnake(Coord coord) {
+        if (board[coord.y][coord.x] > 0) {
             return true;
         }
         return false;
     }
+
     public void nextIteration() {
         //Create new areas for the snake
         switch (snake1.snakeDirection) {
@@ -154,6 +221,7 @@ public void setSaveState(boolean status){
         } else {
             System.out.println("You lose...");
         }
+        saveScore(player, snake1.snakeLength);
         System.exit(0);
     }
 
@@ -199,4 +267,38 @@ class Snake {
         snakeLength = 1;
         snakeDirection = 1;
     }
+
+    public Snake(int x, int y, int length) {
+        snakeX = x;
+        snakeY = y;
+        snakeLength = length;
+        snakeDirection = 1;
+    }
+
+    public Snake(int x, int y, int length, int direction) {
+        snakeX = x;
+        snakeY = y;
+        snakeLength = length;
+        snakeDirection = direction;
+    }
+}
+
+class Person {
+
+    public String name;
+    public int score;
+
+    public Person(String name, int score) {
+        this.name = name;
+        this.score = score;
+    }
+}
+
+class NameComparator implements Comparator<Person> {
+
+    @Override
+    public int compare(Person t, Person t1) {
+        return t.name.compareTo(t1.name);
+    }
+
 }
