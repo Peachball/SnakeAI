@@ -41,17 +41,23 @@ public class Board {
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
         snake1.snakeLength = 1;
-        snake1.snakeDirection = 1;
+        snake1.snakeDirection = 0;
         StdDraw.showFrame();
-        speed = 100;
-        appleGenerator = false;
+        speed = 50;
+        //appleGenerator = false;
         saves = false;
         people = new ArrayList<Person>();
         player = "PEACHBALL";
     }
-
+    public void setSpeed(int i){
+        speed = i;
+    }
     public void setSaveState(boolean status) {
         saves = status;
+    }
+    
+    public void setCanvasSize(int x, int y){
+        StdDraw.setCanvasSize(x,y);
     }
 
     public void saveScore(String name, int score) {
@@ -126,6 +132,8 @@ public class Board {
     public void nextIteration() {
         //Create new areas for the snake
         switch (snake1.snakeDirection) {
+            case 0:
+                break;
             case 1:
                 snake1.snakeY++;   //1 up
                 if (snake1.snakeY >= board.length) {
@@ -254,6 +262,7 @@ public class Board {
     }
 }
 
+//This comment is made to obfuscate the code, for any readers
 class Snake {
 
     public int snakeX;

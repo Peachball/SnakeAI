@@ -8,8 +8,6 @@ public class main {
         Scanner in = new Scanner(System.in);
         Board board = new Board(15, 15);
         board.appleGenerator = true;
-        System.out.println("Write your name");
-        board.player = in.nextLine();
         System.out.println("Choose your game mode:");
         System.out.println("1:Normal player mode");
         System.out.println("2:Simple AI mode");
@@ -115,6 +113,7 @@ public class main {
                         break;
                     case 'f':
                         board.speed = 100;
+                        break;
                     case 'g':
                         board.speed = 150;
                 }
@@ -263,6 +262,12 @@ public class main {
                 break;
             case 'w':
                 direction = 1;
+                break;
+            case 'q':
+                direction = 0;
+                break;
+            case 'p':
+                direction = 5;
                 break;
         }
         return direction;
