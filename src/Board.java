@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -49,53 +50,27 @@ public class Board {
         people = new ArrayList<Person>();
         player = "PEACHBALL";
     }
-    public void setSpeed(int i){
+
+    public void setSpeed(int i) {
         speed = i;
     }
+
     public void setSaveState(boolean status) {
         saves = status;
     }
-    
-    public void setCanvasSize(int x, int y){
-        StdDraw.setCanvasSize(x,y);
+
+    public void setCanvasSize(int x, int y) {
+        StdDraw.setCanvasSize(x, y);
     }
 
     public void saveScore(String name, int score) {
+        PrintWriter out;
         try {
-            BufferedReader in = new BufferedReader(new FileReader("stats.txt"));
-            PrintWriter out = new PrintWriter(new FileWriter("stats.txt"));
-            String buffer = in.readLine();
-            StringTokenizer reader;
-            int counter = 0;
-            while (buffer != null) {
-                reader = new StringTokenizer(buffer);
-                people.add(new Person(reader.nextToken(), Integer.parseInt(reader.nextToken())));
-                buffer = in.readLine();
-            }
-            if (people.size() > 0) {
-                Collections.sort(people, new NameComparator());
-                if (Collections.binarySearch(people, new Person(name, score), new NameComparator()) >= 0) {
-                    if (people.get(Collections.binarySearch(people, new Person(name, score), new NameComparator())).score < score) {
-                        people.set(Collections.binarySearch(people, new Person(name, score), new NameComparator()), new Person(name,score));
-                    }
-                } else {
-                    people.add(new Person(name, score));
-                }
-            } else {
-                people.add(new Person(name, score));
-            }
-            for (counter = 0; counter < people.size(); counter++) {
-                out.println(people.get(counter).name + " " + people.get(counter).score);
-            }
+            out = new PrintWriter(new FileWriter("stats.txt", true));
+            out.println(name + " " + score+" "+speed);
             out.close();
-        } catch (IOException | NumberFormatException e) {
-            try {
-                PrintWriter out = new PrintWriter("stats.txt", "UTF-8");
-                out.println(name + " " + score);
-                out.close();
-            } catch (FileNotFoundException | UnsupportedEncodingException ex) {
-                Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

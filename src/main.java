@@ -17,6 +17,9 @@ public class main {
         decision = Integer.parseInt(in.nextLine());
         switch (decision) {
             case 1:
+                System.out.println("Enter your name:");
+                String buffer =in.nextLine();
+                board.player = buffer;
                 normalMode(board);
                 break;
             case 2:
