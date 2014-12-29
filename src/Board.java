@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -27,6 +26,7 @@ public class Board {
     public boolean saves;
     public ArrayList<Person> people;
     public String player;
+    public boolean troll;
 
     public Board(int x, int y) {
 
@@ -49,6 +49,7 @@ public class Board {
         saves = false;
         people = new ArrayList<Person>();
         player = "PEACHBALL";
+        troll = false;
     }
 
     public void setSpeed(int i) {
@@ -67,7 +68,7 @@ public class Board {
         PrintWriter out;
         try {
             out = new PrintWriter(new FileWriter("stats.txt", true));
-            out.println(name + " " + score+" "+speed);
+            out.println(name + " " + score + " " + speed);
             out.close();
         } catch (IOException ex) {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
@@ -151,7 +152,7 @@ public class Board {
                     continue;
                 }
                 if (board[counterY][counterX] == -2) {
-//                    fillRectangle(counterX, counterY, 3);
+                    fillRectangle(counterX, counterY, 3);
                     board[counterY][counterX]++;
                     continue;
                 }
@@ -173,7 +174,11 @@ public class Board {
         fillRectangle(snake1.snakeX, snake1.snakeY, 4);
         board[snake1.snakeY][snake1.snakeX] = snake1.snakeLength;
         if (appleGenerator && !apple) {
-            generateApple();
+            if (troll) {
+                trollgenerateApple();
+            } else {
+                generateApple();
+            }
         }
 
         StdDraw.show(speed);
@@ -234,6 +239,31 @@ public class Board {
         board[appleY][appleX] = -1;
         fillRectangle(appleX, appleY, 3);
         apple = true;
+    }
+
+    public void trollgenerateApple() {
+        int newDirection = snake1.snakeDirection + 1;
+        if (newDirection > 4) {
+            newDirection = 1;
+        }
+        int counter = 0;
+        Coord apple = main.newCoord(this, newDirection, new Coord(snake1.snakeX, snake1.snakeY));
+        while (main.isSnake(this, apple) && counter < 10) {
+            newDirection++;
+            if (newDirection > 4) {
+                newDirection = 1;
+            }
+            apple = main.newCoord(this, newDirection, new Coord(snake1.snakeX, snake1.snakeY));
+            counter++;
+        }
+        if (counter == 10) {
+            generateApple();
+            return;
+        } else {
+            board[apple.y][apple.x] = -1;
+            fillRectangle(appleX, appleY, 3);
+            this.apple = true;
+        }
     }
 }
 

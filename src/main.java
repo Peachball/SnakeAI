@@ -13,7 +13,7 @@ public class main {
         System.out.println("2:Simple AI mode");
         System.out.println("3: Super Simple Greedy AI mode (still in development)");
         System.out.println("4: Another AI that I plan to write in the future...");
-
+        
         decision = Integer.parseInt(in.nextLine());
         switch (decision) {
             case 1:
@@ -127,7 +127,7 @@ public class main {
                 for (int counterY = 0; counterY < board.board.length; counterY++) {
                     if (isSnake(board, counterX, counterY)) {
                         distances[counterY][counterX] = -1;
-                        continue;
+                       
                     }
                 }
             }
@@ -144,7 +144,7 @@ public class main {
                     distances[counterY][counterX] += shortestPath(board, new Coord(counterX, counterY), snake);
                 }
             }
-            //Mark each point with closest distance to previous point (Dijkstras method first)
+            //Mark each point with closest distance to previous point (Dijkstras method first) 
 
             //Add the point that is closest to the apple into the list:
             int counterX = -1;
