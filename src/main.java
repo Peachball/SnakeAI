@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class main {
@@ -7,14 +9,14 @@ public class main {
     public static void main(String[] args) {
         int decision;
         Scanner in = new Scanner(System.in);
-        Board board = new Board(100, 100);
+        Board board = new Board(10, 10);
         board.appleGenerator = true;
         System.out.println("Choose your game mode:");
         System.out.println("1:Normal player mode");
         System.out.println("2:Simple AI mode");
         System.out.println("3: Super Simple Greedy AI mode (OMFG IT WORKED)"); //These two are both attempts to
         System.out.println("4: Super Simple NOT GONNA DIE AI mode (Close enough)");// avoid A*...
-        System.out.println("5: Attempt at A*...");
+        System.out.println("5: Attempt at legit pathfinding...");
 
         decision = Integer.parseInt(in.nextLine());
         switch (decision) {
@@ -37,10 +39,16 @@ public class main {
     }
 
     static void AI4(Board board) {
+        board.nextIteration();
         while (true) {
-            Coord snake = new Coord(board.snake1.snakeX,board.snake1.snakeY);
-            CoordNode parent = new CoordNode(snake);
-            CoordNode currentNode = parent;
+            Coord snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
+            snake.distance = 0;
+            snake.direction = directionReverser(board.snake1.snakeDirection);
+            LinkedList<Coord> read = new LinkedList<Coord>(); //read like in red (not reed)
+            LinkedList<Coord> buffer = new LinkedList<Coord>();
+            LinkedList<Integer> directions = new LinkedList<Integer>();
+            Coord apple = new Coord(board.appleX, board.appleY);
+            buffer.add(snake);
             //Speed Settings
             if (StdDraw.hasNextKeyTyped()) {
                 switch (StdDraw.nextKeyTyped()) {
@@ -63,9 +71,60 @@ public class main {
                         board.speed = 150;
                 }
             }
-            
-            //Attempt to go to end...
-            
+
+            //Figure out the distances of each node to the origin through dijkstras
+            while (Collections.binarySearch(read, apple, new CoordComparator()) < 0) {
+                for (int counter = 1; counter < 5; counter++) {
+
+                    //Check to make sure that this isn't the same direction as where the buffer came from
+//                    if (buffer.get(0).direction == counter) {
+//                        continue;
+//                    }
+                    Collections.sort(read, new CoordComparator());
+                    if (buffer.size() == 0) {
+                        board.endGame(false);
+                    }
+                    Coord bufferedCoord = newCoord(board, counter, buffer.get(0));
+
+                    //Direction points to the parent coord, not the children node
+                    bufferedCoord.direction = directionReverser(counter);
+                    bufferedCoord.distance = buffer.get(0).distance + 1;
+                    bufferedCoord.parent = buffer.get(0);
+
+                    //Check if the place is a snake or not...
+                    if (isSnake(board, bufferedCoord, bufferedCoord.distance)) {
+                        continue;
+                    }
+                    int bufferedPosition = Collections.binarySearch(read, bufferedCoord, new CoordComparator());
+                    if (bufferedPosition < 0) {
+                        buffer.add(bufferedCoord);
+                        read.add(bufferedCoord);
+                    } else {
+                        if (read.get(bufferedPosition).distance
+                                > bufferedCoord.distance) {
+                            read.set(bufferedPosition, bufferedCoord);
+                        }
+                    }
+                }
+                buffer.remove(0);
+                Collections.sort(read, new CoordComparator());
+            }
+
+            //Figure out the fastest path...
+            Coord currentLocation = apple;
+            currentLocation = read.get(Collections.binarySearch(read, currentLocation, new CoordComparator()));
+            while (!currentLocation.equals(snake)) {
+                
+                directions.add(newDirection(board,currentLocation,currentLocation.parent));
+                currentLocation = currentLocation.parent;
+            }
+
+            //Run the fastest path
+            while (directions.size() != 0) {
+                board.setDirection(board.snake1, directionReverser(directions.get(directions.size() - 1)));
+                directions.remove(directions.size() - 1);
+                board.nextIteration();
+            }
         }
     }
 
@@ -257,12 +316,36 @@ public class main {
 
     }
 
+    static int newDirection(Board board, Coord start, Coord end) {
+        if (start.x != end.x) {
+            if (start.x - end.x == 1) {
+                return 2;
+            }
+            if (start.x - end.x == -1) {
+                return 4;
+            }
+
+        } else if (start.x == end.x) {
+            if (start.y - end.y == 1) {
+                return 3;
+            }
+            if (start.y - end.y == -1) {
+                return 1;
+            }
+        }
+        return -1;
+    }
+
     static boolean isSnake(Board board, int x, int y) {
         return board.board[y][x] > 0;
     }
 
     static boolean isSnake(Board board, Coord coord) {
         return board.board[coord.y][coord.x] > 0;
+    }
+
+    static boolean isSnake(Board board, Coord coord, int time) {
+        return board.board[coord.y][coord.x] - time > 0;
     }
     /*
      * Directionally based, not for the distance
@@ -360,16 +443,46 @@ public class main {
         }
         return direction;
     }
+
+    static int directionReverser(int direction) {
+        int newDirection = direction - 2;
+        if (newDirection < 1) {
+            return newDirection + 4;
+        }
+        return newDirection;
+    }
+
+    static int turnRight(int direction) {
+        int newDirection = direction + 1;
+        if (newDirection > 4) {
+            return newDirection - 1;
+        }
+        return newDirection;
+    }
+
+    static int turnLeft(int direction) {
+        int newDirection = direction - 1;
+        if (newDirection < 1) {
+            return newDirection + 4;
+        }
+        return newDirection;
+    }
 }
 
 class Coord {
 
     public int x;
     public int y;
+    public int direction;
+    public int distance;
+    public Coord parent;
 
     public Coord(int x, int y) {
         this.x = x;
         this.y = y;
+        direction = -1;
+        distance = -1;
+        parent = null;
     }
 
     public int getX() {
@@ -379,30 +492,24 @@ class Coord {
     public int getY() {
         return this.y;
     }
+
+    public boolean equals(Coord coord2) {
+        if (x == coord2.x && y == coord2.y) {
+            return true;
+        }
+        return false;
+    }
 }
 
-class CoordComparator implements Comparator<Coord>{
+class CoordComparator implements Comparator<Coord> {
 
     @Override
     public int compare(Coord t, Coord t1) {
-        if(t.x!=t1.x){
-            return t.x-t1.x;
-        }
-        else{
-            return t.y-t1.y;
+        if (t.x != t1.x) {
+            return t.x - t1.x;
+        } else {
+            return t.y - t1.y;
         }
     }
-    
-}
 
-class CoordNode{
-    public CoordNode d1;
-    public CoordNode d2;
-    public CoordNode d3;
-    public CoordNode d4;
-    public Coord position;
-    public CoordNode parent;
-    public CoordNode(Coord position){
-        this.position = position;
-    }
 }
