@@ -1,14 +1,9 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.StringTokenizer;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,6 +22,8 @@ public class Board {
     public ArrayList<Person> people;
     public String player;
     public boolean troll;
+    public LinkedList<Coord> snake;
+    public Coord tail;
 
     public Board(int x, int y) {
 
@@ -37,10 +34,13 @@ public class Board {
         StdDraw.setPenColor(StdDraw.WHITE);
         StdDraw.filledRectangle(x / 2, y / 2, x / 2, y / 2);
 
+        snake = new LinkedList<Coord>();
+
         //Initialize the Snake
         snake1 = new Snake();
         snake1.snakeX = (int) x / 2;
         snake1.snakeY = (int) y / 2;
+        snake.add(new Coord(snake1.snakeX, snake1.snakeY));
         snake1.snakeLength = 1;
         snake1.snakeDirection = 1;
         StdDraw.showFrame();
@@ -48,8 +48,9 @@ public class Board {
         //appleGenerator = false;
         saves = false;
         people = new ArrayList<Person>();
-        player = "PEACHBALL";
+        player = "AI";
         troll = false;
+        tail = new Coord(snake1.snakeX,snake1.snakeY);
     }
 
     public void setSpeed(int i) {
@@ -146,7 +147,10 @@ public class Board {
         for (int counterX = 0; counterX < board[0].length; counterX++) {
             for (int counterY = 0; counterY < board.length; counterY++) {
                 board[counterY][counterX]--;
-                if (board[counterY][counterX] == 0 || board[counterY][counterX] == -1) {
+                if(board[counterY][counterX] == 0){
+                    tail = new Coord(counterX,counterY);
+                }
+                if (board[counterY][counterX] == -1) {
                     board[counterY][counterX] = 0;
                     fillRectangle(counterX, counterY, 2);
                     continue;
@@ -164,6 +168,7 @@ public class Board {
                     board[counterY][counterX]++;
 //                    fillRectangle(counterX, counterY, 1);
                 }
+                
             }
         }
 
@@ -179,6 +184,10 @@ public class Board {
             } else {
                 generateApple();
             }
+        }
+        snake.add(new Coord(snake1.snakeX, snake1.snakeY));
+        if (!(snake.size() < snake1.snakeLength)) {
+            snake.remove(snake.size() - 1);
         }
 
         StdDraw.show(speed);
