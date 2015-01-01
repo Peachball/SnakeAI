@@ -150,7 +150,7 @@ public class Board {
                 if(board[counterY][counterX] == 0){
                     tail = new Coord(counterX,counterY);
                 }
-                if (board[counterY][counterX] == -1) {
+                if (board[counterY][counterX] == -1||board[counterY][counterX] == 0) {
                     board[counterY][counterX] = 0;
                     fillRectangle(counterX, counterY, 2);
                     continue;
@@ -161,12 +161,12 @@ public class Board {
                     continue;
                 }
                 if (board[counterY][counterX] > 0 && apple) {
-//                    fillRectangle(counterX, counterY, 1);
+                    fillRectangle(counterX, counterY, 1);
                     continue;
                 }
                 if (board[counterY][counterX] > 0 && !apple) {
                     board[counterY][counterX]++;
-//                    fillRectangle(counterX, counterY, 1);
+                    fillRectangle(counterX, counterY, 1);
                 }
                 
             }
@@ -205,7 +205,7 @@ public class Board {
                 StdDraw.setPenColor(StdDraw.RED); //Apple Color
                 break;
             case 4:
-                StdDraw.setPenColor(StdDraw.DARK_GRAY);// Snake Head color
+                StdDraw.setPenColor(StdDraw.PINK);// Snake Head color
                 break;
         }
         StdDraw.filledRectangle(x, y, .45, .45);

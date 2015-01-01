@@ -10,15 +10,17 @@ public class main {
     public static void main(String[] args) {
         int decision;
         Scanner in = new Scanner(System.in);
-        Board board = new Board(15, 15);
+        Board board = new Board(20, 20);
         board.appleGenerator = true;
+        board.speed = 50;
         System.out.println("Choose your game mode:");
         System.out.println("1:Normal player mode");
         System.out.println("2:Simple AI mode");
         System.out.println("3: Super Simple Greedy AI mode (OMFG IT WORKED)"); //These two are both attempts to
-        System.out.println("4: Super Simple NOT GONNA DIE AI mode (Close enough)");// avoid A*...
-        System.out.println("5: Attempt at legit pathfinding...");
-        System.out.println("6: A variant on AI5 (super dijkstras, also, WIP)");
+        System.out.println("4: Super Simple NOT GONNA DIE AI mode (Close enough)");// avoiding A*...
+        System.out.println("5: Attempt at legit pathfinding..."); //dijkstras (accurate but suspiciously slow)
+        System.out.println("6: A variant on AI5 (super dijkstras, also, WIP)"); //I don't really want to work on this...
+        System.out.println("7: Attempt at A* pathfinding (and some other improvements)"); // I think it's A* at least...
 
         decision = Integer.parseInt(in.nextLine());
         switch (decision) {
@@ -42,7 +44,198 @@ public class main {
                 break;
             case 6:
                 AI5(board);
+                break;
+            case 7:
+                AI6(board);
+                break;
         }
+    }
+
+    static boolean[][] deathRegions(Board board, int time) {
+        boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
+        boolean done = false;
+        Coord s;
+        while (!done) {
+            done = true;
+            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+                for (int counterY = 0; counterY < board.board.length; counterY++) {
+                    if (deathRegions[counterY][counterX]) {
+                        continue;
+                    }
+                    if (isSnake(board, new Coord(counterX, counterY), time)) {
+                        deathRegions[counterY][counterX] = true;
+                        done = false;
+                        continue;
+                    }
+                    int sum = 0;
+                    for (int counter = 1; counter < 5; counter++) {
+                        s = newCoord(board, counter, new Coord(counterX, counterY));
+                        if (isSnake(board, s, time) || deathRegions[s.y][s.x]) {
+                            sum++;
+                        }
+                    }
+                    if (sum >= 3) {
+                        deathRegions[counterY][counterX] = true;
+                        done = false;
+                    }
+                }
+            }
+        }
+        return deathRegions;
+    }
+
+    //Check how large the closed space is...
+    static int isClosed(Board board, Coord coord) {
+        LinkedList<Coord> checked = new LinkedList<Coord>();
+        LinkedList<Coord> unchecked = new LinkedList<Coord>();
+        unchecked.add(coord);
+        while (unchecked.size() != 0) {
+            Collections.sort(checked, new CoordComparator());
+            Collections.sort(unchecked, new CoordComparator());
+            if (isSnakez(board, unchecked.get(0))) {
+                unchecked.remove(0);
+                continue;
+            }
+            if (Collections.binarySearch(checked, unchecked.get(0), new CoordComparator()) > 0) {
+                unchecked.remove(0);
+                continue;
+            }
+            for (int counter = 1; counter < 5; counter++) {
+                if (!(Collections.binarySearch(checked, newCoord(board, counter, unchecked.get(0)), new CoordComparator()) > 0)) {
+                    unchecked.add(newCoord(board, counter, unchecked.get(0)));
+                }
+            }
+            checked.add(unchecked.get(0));
+            unchecked.remove(0);
+        }
+        return checked.size();
+    }
+
+    //Literally the only use for this is for the isclosed function
+    private static boolean isSnakez(Board board, Coord coord) {
+        return board.board[coord.y][coord.x] > 0;
+    }
+
+    static void AI6(Board board) {
+        board.nextIteration();
+        while (true) {
+            int direction;
+            Coord snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
+            snake.distance = 0;
+            snake.direction = directionReverser(board.snake1.snakeDirection);
+            LinkedList<Integer> directions = new LinkedList<Integer>();
+            Coord apple = new Coord(board.appleX, board.appleY);
+            //Speed Settings
+            if (StdDraw.hasNextKeyTyped()) {
+                switch (StdDraw.nextKeyTyped()) {
+                    case 'q':
+                        board.speed = 0;
+                        break;
+                    case 'a':
+                        board.speed = 10;
+                        break;
+                    case 's':
+                        board.speed = 25;
+                        break;
+                    case 'd':
+                        board.speed = 50;
+                        break;
+                    case 'f':
+                        board.speed = 100;
+                        break;
+                    case 'g':
+                        board.speed = 150;
+                }
+            }
+            directions = AStar(board, snake, apple);
+            //waste time here
+            while (directions.size() == 0) {
+                survive(board, board.snake1);
+                directions = AStar(board, snake, apple);
+
+            }
+            snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
+            snake.distance = 0;
+            snake.direction = directionReverser(board.snake1.snakeDirection);
+            directions = AStar(board, snake, apple);
+            //Run the fastest path
+            while (directions.size() != 0) {
+                int appleSpace = isClosed(board, apple);
+                int snakeSpace = isClosed(board, new Coord(board.snake1.snakeX, board.snake1.snakeY));
+                if (appleSpace < snakeSpace) {
+
+                }
+                board.setDirection(board.snake1, directionReverser(directions.get(directions.size() - 1)));
+                directions.remove(directions.size() - 1);
+                board.nextIteration();
+            }
+        }
+    }
+
+    static void survive(Board board, Snake asdf) {
+        boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
+        boolean done = false;
+        Coord s;
+        while (!done) {
+            done = true;
+            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+                for (int counterY = 0; counterY < board.board.length; counterY++) {
+                    if (deathRegions[counterY][counterX]) {
+                        continue;
+                    }
+                    if (isSnake(board, new Coord(counterX, counterY))) {
+                        deathRegions[counterY][counterX] = true;
+                        done = false;
+                        continue;
+                    }
+                    int sum = 0;
+                    for (int counter = 1; counter < 5; counter++) {
+                        s = newCoord(board, counter, new Coord(counterX, counterY));
+                        if (isSnake(board, s) || deathRegions[s.y][s.x]) {
+                            sum++;
+                        }
+                    }
+                    if (sum >= 3) {
+                        deathRegions[counterY][counterX] = true;
+                        done = false;
+                    }
+                }
+            }
+        }
+        Coord snake = new Coord(asdf.snakeX, asdf.snakeY);
+        snake.distance = 0;
+        snake.direction = directionReverser(board.snake1.snakeDirection);
+        int direction = board.snake1.snakeDirection;
+
+        int safestDirection = 1;
+        int largestArea = 0;
+        for (int counter = 1; counter < 5; counter++) {
+            if (isClosed(board, newCoord(board, counter, snake)) > largestArea) {
+                safestDirection = counter;
+                largestArea = isClosed(board, newCoord(board, counter, snake));
+            }
+        }
+        if (largestArea == 0) {
+            if (!isSnake(board, newCoord(board, turnRight(direction), snake))
+                    && !deathRegions[newCoord(board, turnRight(direction), snake).y][newCoord(board, turnRight(direction), snake).x]) {
+                safestDirection = turnRight(direction);
+            } else if (!isSnake(board, newCoord(board, direction, snake))
+                    && !deathRegions[newCoord(board, direction, snake).y][newCoord(board, direction, snake).x]) {
+                safestDirection = direction;
+            } else if (!isSnake(board, newCoord(board, turnLeft(direction), snake))
+                    && !deathRegions[newCoord(board, turnLeft(direction), snake).y][newCoord(board, turnLeft(direction), snake).x]) {
+                safestDirection = turnLeft(direction);
+            } else if (!isSnake(board, newCoord(board, turnRight(direction), snake))) {
+                safestDirection = turnRight(direction);
+            } else if (!isSnake(board, newCoord(board, direction, snake))) {
+                safestDirection = direction;
+            } else {
+                safestDirection = turnLeft(direction);
+            }
+        }
+        board.setDirection(asdf, safestDirection);
+
+        board.nextIteration();
     }
 
     static void AI5(Board board) {
@@ -78,31 +271,33 @@ public class main {
                         board.speed = 150;
                 }
             }
-
+            int shortestDistance = (int) shortestPath(board, snake, apple);
             //Figure out the distances of each node to the origin through dijkstras
             while (Collections.binarySearch(read, apple, new CoordComparator()) < 0) {
+                if (buffer.size() == 0) {
+                    board.endGame(false);
+                }
+                Collections.sort(buffer, new AStarComparator());
                 for (int counter = 1; counter < 5; counter++) {
 
                     //Check to make sure that this isn't the same direction as where the buffer came from
-//                    if (buffer.get(0).direction == counter) {
-//                        continue;
-//                    }
-                    Collections.sort(read, new CoordComparator());
-                    if (buffer.size() == 0) {
-                        board.endGame(false);
+                    if (buffer.get(0).direction == counter) {
+                        continue;
                     }
+                    Collections.sort(read, new CoordComparator());
+
                     Coord bufferedCoord = newCoord(board, counter, buffer.get(0));
 
                     //Direction points to the parent coord, not the children node
                     bufferedCoord.direction = directionReverser(counter);
                     bufferedCoord.distance = buffer.get(0).distance + 1;
                     bufferedCoord.parent = buffer.get(0);
+                    bufferedCoord.shortestDistance = shortestDistance;
 
                     //Check if the place is a snake or not...
                     if (isSnake(board, bufferedCoord, bufferedCoord.distance)) {
                         continue;
                     }
-                    int bufferedPosition = Collections.binarySearch(read, bufferedCoord, new CoordComparator());
                     buffer.add(bufferedCoord);
                     read.add(bufferedCoord);
 
@@ -161,8 +356,8 @@ public class main {
             }
 
             directions = dijkstras(board, snake, apple);
-            //waste time here
 
+            //waste time here
             while (directions.size() == 0) {
                 boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
                 boolean done = false;
@@ -197,24 +392,37 @@ public class main {
                 snake.distance = 0;
                 snake.direction = directionReverser(board.snake1.snakeDirection);
                 direction = board.snake1.snakeDirection;
-                if (!isSnake(board, newCoord(board, turnRight(direction), snake))
-                        && !deathRegions[newCoord(board, turnRight(direction), snake).y][newCoord(board, turnRight(direction), snake).x]) {
-                    board.setDirection(board.snake1, turnRight(direction));
-                } else if (!isSnake(board, newCoord(board, direction, snake))
-                        && !deathRegions[newCoord(board, direction, snake).y][newCoord(board, direction, snake).x]) {
-                    board.setDirection(board.snake1, direction);
-                } else if (!isSnake(board, newCoord(board, turnLeft(direction), snake))
-                        && !deathRegions[newCoord(board, turnLeft(direction), snake).y][newCoord(board, turnLeft(direction), snake).x]) {
-                    board.setDirection(board.snake1, turnLeft(direction));
-                } else if (!isSnake(board, newCoord(board, turnRight(direction), snake))) {
-                    board.setDirection(board.snake1, turnRight(direction));
-                } else if (!isSnake(board, newCoord(board, direction, snake))) {
-                    board.setDirection(board.snake1, direction);
-                } else {
-                    board.setDirection(board.snake1, turnLeft(direction));
+                int safestDirection = 1;
+                int largestArea = 0;
+                for (int counter = 1; counter < 5; counter++) {
+                    if (isClosed(board, newCoord(board, counter, snake)) > largestArea) {
+                        safestDirection = counter;
+                        largestArea = isClosed(board, newCoord(board, counter, snake));
+                    }
                 }
-                directions = dijkstras(board, snake, apple);
+                if (largestArea == 0) {
+                    if (!isSnake(board, newCoord(board, turnRight(direction), snake))
+                            && !deathRegions[newCoord(board, turnRight(direction), snake).y][newCoord(board, turnRight(direction), snake).x]) {
+                        safestDirection = turnRight(direction);
+                    } else if (!isSnake(board, newCoord(board, direction, snake))
+                            && !deathRegions[newCoord(board, direction, snake).y][newCoord(board, direction, snake).x]) {
+                        safestDirection = direction;
+                    } else if (!isSnake(board, newCoord(board, turnLeft(direction), snake))
+                            && !deathRegions[newCoord(board, turnLeft(direction), snake).y][newCoord(board, turnLeft(direction), snake).x]) {
+                        safestDirection = turnLeft(direction);
+                    } else if (!isSnake(board, newCoord(board, turnRight(direction), snake))) {
+                        safestDirection = turnRight(direction);
+                    } else if (!isSnake(board, newCoord(board, direction, snake))) {
+                        safestDirection = direction;
+                    } else {
+                        safestDirection = turnLeft(direction);
+                    }
+                }
+                board.setDirection(board.snake1, safestDirection);
+
                 board.nextIteration();
+                directions = dijkstras(board, snake, apple);
+
             }
             snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
             snake.distance = 0;
@@ -229,53 +437,144 @@ public class main {
         }
     }
 
+    static LinkedList<Integer> AStar(Board board, Coord start, Coord end) {
+        LinkedList<Integer> directions = new LinkedList<Integer>();
+        LinkedList<Coord> read = new LinkedList<Coord>();
+        LinkedList<Coord> buffer = new LinkedList<Coord>();
+        start.distanceToGoal = (int) shortestPath(board, start, end);
+        buffer.add(start);
+        int shortestDistance = (int) shortestPath(board, start, end);
+//        boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
+//        boolean done = false;
+//        Coord s;
+//        while (!done) {
+//            done = true;
+//            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+//                for (int counterY = 0; counterY < board.board.length; counterY++) {
+//                    if (deathRegions[counterY][counterX]) {
+//                        continue;
+//                    }
+//                    if (isSnake(board, new Coord(counterX, counterY))) {
+//                        deathRegions[counterY][counterX] = true;
+//                        done = false;
+//                        continue;
+//                    }
+//                    int sum = 0;
+//                    for (int counter = 1; counter < 5; counter++) {
+//                        s = newCoord(board, counter, new Coord(counterX, counterY));
+//                        if (isSnake(board, s) || deathRegions[s.y][s.x]) {
+//                            sum++;
+//                        }
+//                    }
+//                    if (sum >= 3) {
+//                        deathRegions[counterY][counterX] = true;
+//                        done = false;
+//                    }
+//                }
+//            }
+//        }
+        //Figure out the distances of each node to the origin through dijkstras
+        while (Collections.binarySearch(read, end, new CoordComparator()) < 0) {
+            if (buffer.size() == 0) {
+                return directions;
+            }
+
+            //Pick the node closest to the end...
+            Collections.sort(buffer, new AStarComparator());
+            for (int counter = 1; counter < 5; counter++) {
+
+                //Check to make sure that this isn't the same direction as where the buffer came from
+                if (buffer.get(0).direction == counter) {
+                    continue;
+                }
+                Collections.sort(read, new CoordComparator());
+
+                Coord bufferedCoord = newCoord(board, counter, buffer.get(0));
+
+                //Direction points to the parent coord, not the children node
+                bufferedCoord.direction = directionReverser(counter);
+                bufferedCoord.distance = buffer.get(0).distance + 1;
+                bufferedCoord.distanceToGoal = (int) shortestPath(board, bufferedCoord, end);
+                bufferedCoord.parent = buffer.get(0);
+                bufferedCoord.shortestDistance = shortestDistance;
+
+                //Check if the place is a snake or not...
+                if (isSnake(board, bufferedCoord, bufferedCoord.distance) /*|| deathRegions[bufferedCoord.y][bufferedCoord.x]*/) {
+                    continue;
+                }
+                int bufferedPosition = Collections.binarySearch(read, bufferedCoord, new CoordComparator());
+                if (bufferedPosition < 0) {
+                    buffer.add(bufferedCoord);
+                    read.add(bufferedCoord);
+                } else {
+                    if (read.get(bufferedPosition).distance
+                            > bufferedCoord.distance) {
+                        read.set(bufferedPosition, bufferedCoord);
+                    }
+                }
+
+            }
+            buffer.remove(0);
+            Collections.sort(read, new CoordComparator());
+        }
+
+        //Figure out the fastest path...
+        Coord currentLocation = end;
+        currentLocation = read.get(Collections.binarySearch(read, currentLocation, new CoordComparator()));
+        while (!currentLocation.equals(start)) {
+            directions.add(newDirection(board, currentLocation, currentLocation.parent));
+            currentLocation = currentLocation.parent;
+        }
+        return directions;
+    }
+
     static LinkedList<Integer> dijkstras(Board board, Coord start, Coord end) {
         LinkedList<Integer> directions = new LinkedList<Integer>();
         LinkedList<Coord> read = new LinkedList<Coord>();
         LinkedList<Coord> buffer = new LinkedList<Coord>();
         buffer.add(start);
-        boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
-        boolean done = false;
-        Coord s;
-        while (!done) {
-            done = true;
-            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
-                for (int counterY = 0; counterY < board.board.length; counterY++) {
-                    if (deathRegions[counterY][counterX]) {
-                        continue;
-                    }
-                    if (isSnake(board, new Coord(counterX, counterY))) {
-                        deathRegions[counterY][counterX] = true;
-                        done = false;
-                        continue;
-                    }
-                    int sum = 0;
-                    for (int counter = 1; counter < 5; counter++) {
-                        s = newCoord(board, counter, new Coord(counterX, counterY));
-                        if (isSnake(board, s) || deathRegions[s.y][s.x]) {
-                            sum++;
-                        }
-                    }
-                    if (sum >= 3) {
-                        deathRegions[counterY][counterX] = true;
-                        done = false;
-                    }
-                }
-            }
-        }
+//        boolean[][] deathRegions = new boolean[board.board.length][board.board[0].length];
+//        boolean done = false;
+//        Coord s;
+//        while (!done) {
+//            done = true;
+//            for (int counterX = 0; counterX < board.board[0].length; counterX++) {
+//                for (int counterY = 0; counterY < board.board.length; counterY++) {
+//                    if (deathRegions[counterY][counterX]) {
+//                        continue;
+//                    }
+//                    if (isSnake(board, new Coord(counterX, counterY))) {
+//                        deathRegions[counterY][counterX] = true;
+//                        done = false;
+//                        continue;
+//                    }
+//                    int sum = 0;
+//                    for (int counter = 1; counter < 5; counter++) {
+//                        s = newCoord(board, counter, new Coord(counterX, counterY));
+//                        if (isSnake(board, s) || deathRegions[s.y][s.x]) {
+//                            sum++;
+//                        }
+//                    }
+//                    if (sum >= 3) {
+//                        deathRegions[counterY][counterX] = true;
+//                        done = false;
+//                    }
+//                }
+//            }
+//        }
 
         //Figure out the distances of each node to the origin through dijkstras
         while (Collections.binarySearch(read, end, new CoordComparator()) < 0) {
             for (int counter = 1; counter < 5; counter++) {
-
-                //Check to make sure that this isn't the same direction as where the buffer came from
-//                    if (buffer.get(0).direction == counter) {
-//                        continue;
-//                    }
-                Collections.sort(read, new CoordComparator());
                 if (buffer.size() == 0) {
                     return directions;
                 }
+                //Check to make sure that this isn't the same direction as where the buffer came from
+                if (buffer.get(0).direction == counter) {
+                    continue;
+                }
+                Collections.sort(read, new CoordComparator());
+
                 Coord bufferedCoord = newCoord(board, counter, buffer.get(0));
 
                 //Direction points to the parent coord, not the children node
@@ -284,7 +583,7 @@ public class main {
                 bufferedCoord.parent = buffer.get(0);
 
                 //Check if the place is a snake or not...
-                if (isSnake(board, bufferedCoord, bufferedCoord.distance) || deathRegions[bufferedCoord.y][bufferedCoord.x]) {
+                if (isSnake(board, bufferedCoord, bufferedCoord.distance) /*|| deathRegions[bufferedCoord.y][bufferedCoord.x]*/) {
                     continue;
                 }
                 int bufferedPosition = Collections.binarySearch(read, bufferedCoord, new CoordComparator());
@@ -435,7 +734,19 @@ public class main {
     }
 
     static double shortestPath(Board board, Coord location1, Coord location2) {
-        return Math.abs(location2.x - location1.x) + Math.abs(location2.y - location1.y);
+        int diff1;
+        int diff2;
+        if (Math.abs(location2.x - location1.x) < board.board[0].length - 1 - Math.abs(location1.x - location2.x)) {
+            diff1 = Math.abs(location2.x - location1.x);
+        } else {
+            diff1 = board.board[0].length - 1 - Math.abs(location1.x - location2.x);
+        }
+        if (Math.abs(location2.y - location1.y) < board.board.length - 1 - Math.abs(location1.y - location2.y)) {
+            diff2 = Math.abs(location2.y - location1.y);
+        } else {
+            diff2 = board.board.length - 1 - Math.abs(location1.y - location2.y);
+        }
+        return diff1 + diff2;
     }
 
     static void normalMode(Board board) {
@@ -674,6 +985,8 @@ class Coord {
     public int distance;
     public Coord parent;
     public LinkedList<Coord> snake;
+    public int distanceToGoal;
+    public int shortestDistance;
 
     public Coord(int x, int y) {
         this.x = x;
@@ -682,6 +995,8 @@ class Coord {
         distance = -1;
         parent = null;
         snake = new LinkedList<Coord>();
+        distanceToGoal = -1;
+        shortestDistance = 0;
     }
 
     public int getX() {
@@ -709,6 +1024,19 @@ class CoordComparator implements Comparator<Coord> {
         } else {
             return t.y - t1.y;
         }
+    }
+
+}
+
+class AStarComparator implements Comparator<Coord> {
+
+    @Override
+    public int compare(Coord t, Coord t1) {
+        if (t.distanceToGoal == -1 || t1.distanceToGoal == -1
+                || t.distance == -1 || t1.distance == -1) {
+            return 0;
+        }
+        return Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance);
     }
 
 }
