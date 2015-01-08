@@ -10,7 +10,7 @@ public class main {
     public static void main(String[] args) {
         int decision;
         Scanner in = new Scanner(System.in);
-        Board board = new Board(20, 20);
+        Board board = new Board(100, 100);
         board.appleGenerator = true;
         board.speed = 50;
         System.out.println("Choose your game mode:");
@@ -163,7 +163,7 @@ public class main {
                 int appleSpace = isClosed(board, apple);
                 int snakeSpace = isClosed(board, new Coord(board.snake1.snakeX, board.snake1.snakeY));
                 if (appleSpace < snakeSpace) {
-
+//                    break;
                 }
                 board.setDirection(board.snake1, directionReverser(directions.get(directions.size() - 1)));
                 directions.remove(directions.size() - 1);
@@ -1036,7 +1036,19 @@ class AStarComparator implements Comparator<Coord> {
                 || t.distance == -1 || t1.distance == -1) {
             return 0;
         }
+        if (Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance) != 0) {
+            return t.direction - t1.direction;
+        }
         return Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance);
+    }
+
+}
+
+class GreedySearch implements Comparator<Coord> {
+
+    @Override
+    public int compare(Coord t, Coord t1) {
+        return t.distanceToGoal - t1.distanceToGoal;
     }
 
 }
