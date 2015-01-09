@@ -10,7 +10,7 @@ public class main {
     public static void main(String[] args) {
         int decision;
         Scanner in = new Scanner(System.in);
-        Board board = new Board(100, 100);
+        Board board = new Board(20, 20);
         board.appleGenerator = true;
         board.speed = 50;
         System.out.println("Choose your game mode:");
@@ -160,11 +160,11 @@ public class main {
             directions = AStar(board, snake, apple);
             //Run the fastest path
             while (directions.size() != 0) {
-                int appleSpace = isClosed(board, apple);
-                int snakeSpace = isClosed(board, new Coord(board.snake1.snakeX, board.snake1.snakeY));
-                if (appleSpace < snakeSpace) {
-//                    break;
-                }
+//                int appleSpace = isClosed(board, apple);
+//                int snakeSpace = isClosed(board, new Coord(board.snake1.snakeX, board.snake1.snakeY));
+//                if (appleSpace < snakeSpace) {
+////                    break;
+//                }
                 board.setDirection(board.snake1, directionReverser(directions.get(directions.size() - 1)));
                 directions.remove(directions.size() - 1);
                 board.nextIteration();
