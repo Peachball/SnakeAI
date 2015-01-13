@@ -1036,9 +1036,9 @@ class AStarComparator implements Comparator<Coord> {
                 || t.distance == -1 || t1.distance == -1) {
             return 0;
         }
-        if (Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance) != 0) {
-            return t.direction - t1.direction;
-        }
+//        if (Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance) != 0) {
+//            return t.direction - t1.direction;
+//        }
         return Math.abs(t.distanceToGoal + t.distance - t.shortestDistance) - Math.abs(t1.distance + t1.distanceToGoal - t.shortestDistance);
     }
 
