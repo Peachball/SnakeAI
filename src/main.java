@@ -152,7 +152,6 @@ public class main {
             while (directions.size() == 0) {
                 survive(board, board.snake1);
                 directions = AStar(board, snake, apple);
-
             }
             snake = new Coord(board.snake1.snakeX, board.snake1.snakeY);
             snake.distance = 0;

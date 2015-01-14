@@ -72,7 +72,7 @@ public class Board {
             out.println(name + " " + score + " " + speed);
             out.close();
         } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("We screwed up somewhere while saving your stats. Sorry");
         }
     }
 
@@ -93,17 +93,10 @@ public class Board {
     }
 
     public boolean isSnake(int x, int y) {
-        if (board[y][x] > 0) {
-            return true;
-        }
-        return false;
+        return board[y][x] > 0;
     }
-
     public boolean isSnake(Coord coord) {
-        if (board[coord.y][coord.x] > 0) {
-            return true;
-        }
-        return false;
+        return board[coord.y][coord.x] > 0;
     }
 
     public void nextIteration() {
@@ -112,9 +105,9 @@ public class Board {
             case 0:
                 break;
             case 1:
-                snake1.snakeY++;   //1 up
+                snake1.snakeY++;   //1 is up
                 if (snake1.snakeY >= board.length) {
-                    snake1.snakeY = board.length - snake1.snakeY;
+                    snake1.snakeY = board.length - snake1.snakeY; //Loops around. 
                 }
                 break;
             case 2:
@@ -136,14 +129,16 @@ public class Board {
                 }
                 break;
         }
-        if (board[snake1.snakeY][snake1.snakeX] == -1) {
+        if (board[snake1.snakeY][snake1.snakeX] == -1) {//We got the apple
             snake1.snakeLength++;
             apple = false;
         }
-        if (snake1.snakeLength == board.length * board[0].length) {
+        if (snake1.snakeLength == board.length * board[0].length){
             endGame(true);
+            System.out.println("Wow. Just. Wow.\nAre you greedy searching?");
         }
         //Set nonsnake parts to be white:
+        //We need to record change rather than just nuking everything.
         for (int counterX = 0; counterX < board[0].length; counterX++) {
             for (int counterY = 0; counterY < board.length; counterY++) {
                 board[counterY][counterX]--;
@@ -180,7 +175,7 @@ public class Board {
         board[snake1.snakeY][snake1.snakeX] = snake1.snakeLength;
         if (appleGenerator && !apple) {
             if (troll) {
-                trollgenerateApple();
+                trollgenerateApple();//Remember to remove this later.
             } else {
                 generateApple();
             }
