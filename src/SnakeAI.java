@@ -76,8 +76,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX() - 1, p.getY()), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
+            try{
             if (grid[p.getX() + grid.length - 1][p.getY()] <= 0) {
                 makeNode(new Point(p.getX() + 1, p.getY()), parent);
+            }
+            }catch(ArrayIndexOutOfBoundsException ex){
+                    
             }
         }
         try {
@@ -85,8 +89,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX(), p.getY() + 1), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            if (grid[p.getX()][p.getY() - grid[0].length + 1] <= 0) {
-                makeNode(new Point(p.getX() + 1, p.getY()), parent);
+            try{
+                if (grid[p.getX()][p.getY() - grid[0].length + 1] <= 0) {
+                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
+                }
+            }catch(ArrayIndexOutOfBoundsException ex){
+                    
             }
         }
         try {
@@ -94,8 +102,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX(), p.getY() - 1), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
+            try{
             if (grid[p.getX()][p.getY() + grid[0].length - 1] <= 0) {
                 makeNode(new Point(p.getX() + 1, p.getY()), parent);
+            }
+            }catch(ArrayIndexOutOfBoundsException ex){
+                    
             }
         }
     }
@@ -116,7 +128,7 @@ public class SnakeAI {
             }
         }
         while (!openSet.isEmpty() && !checkDone()) {
-            Node thing = openSet.get(openSet.size() - 1);
+            Node thing = openSet.get(0);
             addSurround(thing);
             openSet.remove(thing);
             closedSet.put(thing.self, thing);
