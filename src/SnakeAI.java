@@ -26,7 +26,7 @@ public class SnakeAI {
         CurrentAI.pathFind();
     }
     public SnakeAI(int[][] grid/*, int snakeLength*/) {
-        openSet = new ArrayList<Node>();
+        openSet = new LinkedList<Node>();
         closedSet = new HashMap<Point, Node>();
         this.grid = grid;
     }
