@@ -1,12 +1,10 @@
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 
 public class SnakeAI {
 
@@ -16,34 +14,35 @@ public class SnakeAI {
     private Map<Point, Node> closedSet;
     public static final int apple = -1;
     public static final int snakeHead = 1;
-    public static SnakeAI placeholder = new SnakeAI(null, 0);
+    public static SnakeAI CurrentAI;
     private int[][] grid;
-
-    public SnakeAI(int[][] grid, int snakeLength) {
+    public static void main(String[] args){
+        int[][] grid = {{0,-1,0,0,0},
+                        {1,1,1,1,0},
+                        {0,0,0,0,0},
+                        {0,-2,0,0,0}  
+        };
+        CurrentAI = new SnakeAI(grid);
+        CurrentAI.pathFind();
+    }
+    public SnakeAI(int[][] grid/*, int snakeLength*/) {
         openSet = new ArrayList<Node>();
         closedSet = new HashMap<Point, Node>();
         this.grid = grid;
     }
 
-    public static void binaryInsert(List<Node> list, Node thing) {
-        list.add(binarySearch(list, thing.getPoint()), thing);
-    }
-
-    private static int binarySearch(List<Node> a, Point thing) {
-        int low = 0;
-        int high = a.size() - 1;
-        int mid;
-        while (low <= high) {
-            mid = (low + high) / 2;
-            if (a.get(mid).getPoint().equals(thing)) {
-                high = mid - 1;
-            } else if (a.get(mid).getPoint().equals(thing)) {
-                low = mid + 1;
-            } else {
-                return mid;
-            }
+    private static void insert(List<Node> a, Node thing) throws AlreadyInListException {
+        ListIterator itr = a.listIterator();
+        while(itr.hasNext()){
+            Node n = (Node)itr.next();
+            if(n.fScore() > thing.fScore()){
+                itr.previous();
+                itr.add(thing);
+                break;
+            }else if(n.equals(thing))
+                throw new AlreadyInListException(n);
         }
-        return -1;
+        itr.add(thing);
     }
 
     public Point getTarget() {
@@ -52,11 +51,11 @@ public class SnakeAI {
 
     private void makeNode(Point p, Node parent) {
         if (!closedSet.containsKey(p)) {
-            int index = binarySearch(openSet, p);
-            if (index == -1) {
-                openSet.add(index, new Node(p, parent));
-            } else {
-                openSet.get(index).checkBetter(parent);
+            Node process = new Node(p, parent);
+            try{
+            insert(openSet, process);
+            }catch(AlreadyInListException e){
+                e.getNode().checkBetter(parent);
             }
         }
     }
@@ -106,8 +105,10 @@ public class SnakeAI {
         int counter = 0;
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
-                if (grid[i][j] == 1) {
-                    openSet.add(new Node(i, j, null));
+                if (grid[i][j] == -2) {
+                    Node n = new Node(i, j, null);
+                    System.out.println("Started with " + n);
+                    openSet.add(n);
                     start = new Point(i, j);
                 } else if (grid[i][j] == -1) {
                     target = new Point(i, j);
@@ -115,7 +116,11 @@ public class SnakeAI {
             }
         }
         while (!openSet.isEmpty() && !checkDone()) {
-            addSurround(openSet.get(openSet.size() - 1));
+            Node thing = openSet.get(openSet.size() - 1);
+            addSurround(thing);
+            openSet.remove(thing);
+            closedSet.put(thing.self, thing);
+            System.out.println("Added " + thing + " to the closed set.");
         }
 
     }
@@ -135,7 +140,6 @@ public class SnakeAI {
         }
         return toSender;
     }
-
     class Node {
 
         private Point parent;
@@ -147,16 +151,20 @@ public class SnakeAI {
             this.self = loc;
             this.parent = parent.getPoint();
             this.gScore = parent.fScore() + 1;
-            this.hScore = Math.abs(SnakeAI.placeholder.getTarget().getX() - loc.getX() + SnakeAI.placeholder.getTarget().getX() - loc.getY());
+            this.hScore = Math.abs(SnakeAI.CurrentAI.getTarget().getX() - loc.getX() + SnakeAI.CurrentAI.getTarget().getX() - loc.getY());
         }
 
         public Node(int x, int y, Node parent) {
             this.self = new Point(x, y);
+            if(parent != null){
             this.parent = parent.getPoint();
             this.gScore = parent.fScore() + 1;
-            this.hScore = Math.abs(SnakeAI.placeholder.getTarget().getX() - x + SnakeAI.placeholder.getTarget().getX() - y);
+            }else{
+                this.parent = null;
+                this.gScore = 1;
+            }
+            this.hScore = Math.abs(SnakeAI.CurrentAI.getTarget().getX() - x + SnakeAI.CurrentAI.getTarget().getX() - y);
         }
-
         public int fScore() {
             return gScore + hScore;
         }
@@ -172,17 +180,28 @@ public class SnakeAI {
         public Point getPoint() {
             return self;
         }
-
+        @Override
+        public String toString(){
+            return self + " has parent of " + parent + " with gScore " + gScore + " with hScore " + hScore; 
+        }
         public boolean checkBetter(Node n) {
             if (n.gScore + 1 < gScore()) {
                 gScore = n.fScore() + 1;
                 parent = n.getPoint();
+                System.out.println("Changing " + self + "'s parent to " + n.getPoint());
                 return true;
             }
             return false;
         }
+        @Override
+        public boolean equals(Object other){
+            if(other instanceof Node && other != null){
+                return ((Node) other).self.equals(this.self);
+            }else{
+                return false;
+            }
+        }
     }
-
     class Point {
 
         private int x, y;
@@ -211,6 +230,23 @@ public class SnakeAI {
                 return x == targ[0] && y == targ[1];
             }
             return false;
+        }
+        @Override
+        public int hashCode(){
+            return (x*y + y + x)%Integer.MAX_VALUE;
+        }
+        @Override
+        public String toString(){
+            return "(" + x + "," + y + ")";
+        }
+    }
+    static class AlreadyInListException extends Exception{
+        Node already;
+        public AlreadyInListException(Node n){
+            this.already = n;
+        }
+        public Node getNode(){
+            return already;
         }
     }
 }
