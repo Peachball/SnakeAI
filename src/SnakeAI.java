@@ -16,15 +16,30 @@ public class SnakeAI {
     public static final int snakeHead = 1;
     public static SnakeAI CurrentAI;
     private int[][] grid;
-    public static void main(String[] args){
-        int[][] grid = {{0,-1,0,0,0},
-                        {1,1,1,1,0},
-                        {0,0,0,0,0},
-                        {0,-2,0,0,0}  
+
+    public static void main(String[] args) {
+        int[][] grid = 
+        {{0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0},
+        {0, 1, -1, 0, 0},
+        {0, 1, 1, 1, 0},
+        {-2, 0, 1, 0, 1}
         };
+        int[][] out = new int[5][5];
         CurrentAI = new SnakeAI(grid);
         CurrentAI.pathFind();
+        List<Node> thing = CurrentAI.reconstruct();
+        for(Node n : thing){
+            grid[n.self.x][n.self.y] = 3;
+            System.out.println(n.self);
+        }
+        for(int[] n : grid){
+            for(int m : n)
+                System.out.print(m + " ");
+            System.out.println();
+        }
     }
+
     public SnakeAI(int[][] grid/*, int snakeLength*/) {
         openSet = new LinkedList<Node>();
         closedSet = new HashMap<Point, Node>();
@@ -33,14 +48,15 @@ public class SnakeAI {
 
     private static void insert(List<Node> a, Node thing) throws AlreadyInListException {
         ListIterator itr = a.listIterator();
-        while(itr.hasNext()){
-            Node n = (Node)itr.next();
-            if(n.fScore() > thing.fScore()){
+        while (itr.hasNext()) {
+            Node n = (Node) itr.next();
+            if (n.fScore() > thing.fScore()) {
                 itr.previous();
                 itr.add(thing);
                 break;
-            }else if(n.equals(thing))
+            } else if (n.equals(thing)) {
                 throw new AlreadyInListException(n);
+            }
         }
         itr.add(thing);
     }
@@ -52,9 +68,9 @@ public class SnakeAI {
     private void makeNode(Point p, Node parent) {
         if (!closedSet.containsKey(p)) {
             Node process = new Node(p, parent);
-            try{
-            insert(openSet, process);
-            }catch(AlreadyInListException e){
+            try {
+                insert(openSet, process);
+            } catch (AlreadyInListException e) {
                 e.getNode().checkBetter(parent);
             }
         }
@@ -67,8 +83,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX() + 1, p.getY()), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            if (grid[p.getX() - grid.length + 1][p.getY()] <= 0) {
-                makeNode(new Point(p.getX() + 1, p.getY()), parent);
+            try {
+                if (grid[p.getX() - grid.length + 1][p.getY()] <= 0) {
+                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
+                }
+            } catch (ArrayIndexOutOfBoundsException ex) {
+
             }
         }
         try {
@@ -76,12 +96,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX() - 1, p.getY()), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            try{
-            if (grid[p.getX() + grid.length - 1][p.getY()] <= 0) {
-                makeNode(new Point(p.getX() + 1, p.getY()), parent);
-            }
-            }catch(ArrayIndexOutOfBoundsException ex){
-                    
+            try {
+                if (grid[p.getX() + grid.length - 1][p.getY()] <= 0) {
+                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
+                }
+            } catch (ArrayIndexOutOfBoundsException ex) {
+
             }
         }
         try {
@@ -89,12 +109,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX(), p.getY() + 1), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            try{
+            try {
                 if (grid[p.getX()][p.getY() - grid[0].length + 1] <= 0) {
                     makeNode(new Point(p.getX() + 1, p.getY()), parent);
                 }
-            }catch(ArrayIndexOutOfBoundsException ex){
-                    
+            } catch (ArrayIndexOutOfBoundsException ex) {
+
             }
         }
         try {
@@ -102,12 +122,12 @@ public class SnakeAI {
                 makeNode(new Point(p.getX(), p.getY() - 1), parent);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            try{
-            if (grid[p.getX()][p.getY() + grid[0].length - 1] <= 0) {
-                makeNode(new Point(p.getX() + 1, p.getY()), parent);
-            }
-            }catch(ArrayIndexOutOfBoundsException ex){
-                    
+            try {
+                if (grid[p.getX()][p.getY() + grid[0].length - 1] <= 0) {
+                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
+                }
+            } catch (ArrayIndexOutOfBoundsException ex) {
+
             }
         }
     }
@@ -118,15 +138,16 @@ public class SnakeAI {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
                 if (grid[i][j] == -2) {
-                    Node n = new Node(i, j, null);
-                    System.out.println("Started with " + n);
-                    openSet.add(n);
-                    start = new Point(i, j);
+                    
+                    start = new Point(i,j);
                 } else if (grid[i][j] == -1) {
-                    target = new Point(i, j);
+                    target = new Point(i,j);
                 }
             }
         }
+        Node n = new Node(start, null);
+        System.out.println("Started with " + n);
+        openSet.add(n);
         while (!openSet.isEmpty() && !checkDone()) {
             Node thing = openSet.get(0);
             addSurround(thing);
@@ -134,6 +155,7 @@ public class SnakeAI {
             closedSet.put(thing.self, thing);
             System.out.println("Added " + thing + " to the closed set.");
         }
+        
 
     }
 
@@ -143,15 +165,17 @@ public class SnakeAI {
 
     public LinkedList<Node> reconstruct() {
         LinkedList<Node> toSender = new LinkedList<>();
+        toSender.add(closedSet.get(target));
         while (true) {
             Node process = toSender.get(0);
-            toSender.add(0, process);
-            if (process.self.equals(start)) {
+            if (process.parent.equals(start)) {
                 break;
             }
+            toSender.add(0, closedSet.get(process.parent));
         }
         return toSender;
     }
+
     class Node {
 
         private Point parent;
@@ -161,22 +185,28 @@ public class SnakeAI {
 
         public Node(Point loc, Node parent) {
             this.self = loc;
-            this.parent = parent.getPoint();
-            this.gScore = parent.fScore() + 1;
+            if (parent != null) {
+                this.parent = parent.getPoint();
+                this.gScore = parent.fScore() + 1;
+            } else {
+                this.parent = null;
+                this.gScore = 1;
+            }
             this.hScore = Math.abs(SnakeAI.CurrentAI.getTarget().getX() - loc.getX() + SnakeAI.CurrentAI.getTarget().getX() - loc.getY());
         }
 
         public Node(int x, int y, Node parent) {
             this.self = new Point(x, y);
-            if(parent != null){
-            this.parent = parent.getPoint();
-            this.gScore = parent.fScore() + 1;
-            }else{
+            if (parent != null) {
+                this.parent = parent.getPoint();
+                this.gScore = parent.fScore() + 1;
+            } else {
                 this.parent = null;
                 this.gScore = 1;
             }
             this.hScore = Math.abs(SnakeAI.CurrentAI.getTarget().getX() - x + SnakeAI.CurrentAI.getTarget().getX() - y);
         }
+
         public int fScore() {
             return gScore + hScore;
         }
@@ -192,10 +222,12 @@ public class SnakeAI {
         public Point getPoint() {
             return self;
         }
+
         @Override
-        public String toString(){
-            return self + " has parent of " + parent + " with gScore " + gScore + " with hScore " + hScore; 
+        public String toString() {
+            return self + " has parent of " + parent + " with gScore " + gScore + " with hScore " + hScore;
         }
+
         public boolean checkBetter(Node n) {
             if (n.gScore + 1 < gScore()) {
                 gScore = n.fScore() + 1;
@@ -205,15 +237,17 @@ public class SnakeAI {
             }
             return false;
         }
+
         @Override
-        public boolean equals(Object other){
-            if(other instanceof Node && other != null){
+        public boolean equals(Object other) {
+            if (other instanceof Node && other != null) {
                 return ((Node) other).self.equals(this.self);
-            }else{
+            } else {
                 return false;
             }
         }
     }
+
     class Point {
 
         private int x, y;
@@ -243,21 +277,27 @@ public class SnakeAI {
             }
             return false;
         }
+
         @Override
-        public int hashCode(){
-            return (x*y + y + x)%Integer.MAX_VALUE;
+        public int hashCode() {
+            return (x * y + y + x) % Integer.MAX_VALUE;
         }
+
         @Override
-        public String toString(){
+        public String toString() {
             return "(" + x + "," + y + ")";
         }
     }
-    static class AlreadyInListException extends Exception{
+
+    static class AlreadyInListException extends Exception {
+
         Node already;
-        public AlreadyInListException(Node n){
+
+        public AlreadyInListException(Node n) {
             this.already = n;
         }
-        public Node getNode(){
+
+        public Node getNode() {
             return already;
         }
     }
