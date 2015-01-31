@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,24 +15,30 @@ public class SnakeAI {
     public static final int snakeHead = 1;
     public static SnakeAI CurrentAI;
     private int[][] grid;
-
+    private int counter = 1;
     public static void main(String[] args) {
+        //Testing Code
         int[][] grid = 
-        {{0, 0, 0, 0, 0},
-        {0, 1, 1, 1, 0},
-        {0, 1, -1, 0, 0},
-        {0, 1, 1, 1, 0},
-        {-2, 0, 1, 0, 1}
+        {{10, 11, 12, 13, 0},
+        {9, 0, 2, 1, 0},
+        {8, -1, 3, 0, 0},
+        {7, 0, 4, 5, 6},
+        {0, 0, 0, 0, 0}
         };
-        int[][] out = new int[5][5];
+        int[][] out = {{0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0},
+        {0, -1, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+        };;
         CurrentAI = new SnakeAI(grid);
         CurrentAI.pathFind();
         List<Node> thing = CurrentAI.reconstruct();
         for(Node n : thing){
-            grid[n.self.x][n.self.y] = 3;
+            out[n.self.x][n.self.y] = 3;
             System.out.println(n.self);
         }
-        for(int[] n : grid){
+        for(int[] n : out){
             for(int m : n)
                 System.out.print(m + " ");
             System.out.println();
@@ -60,11 +65,9 @@ public class SnakeAI {
         }
         itr.add(thing);
     }
-
     public Point getTarget() {
         return target;
     }
-
     private void makeNode(Point p, Node parent) {
         if (!closedSet.containsKey(p)) {
             Node process = new Node(p, parent);
@@ -75,70 +78,28 @@ public class SnakeAI {
             }
         }
     }
-
     public void addSurround(Node parent) {
         Point p = parent.getPoint();
-        try {
-            if (grid[p.getX() + 1][p.getY()] <= 0) {
-                makeNode(new Point(p.getX() + 1, p.getY()), parent);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            try {
-                if (grid[p.getX() - grid.length + 1][p.getY()] <= 0) {
-                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
-                }
-            } catch (ArrayIndexOutOfBoundsException ex) {
-
-            }
+        if(grid[modNumber(p.getX() + 1,grid.length)][p.getY()] <= counter){
+            makeNode(new Point(modNumber(p.getX() + 1,grid.length), p.getY()), parent);
         }
-        try {
-            if (grid[p.getX() - 1][p.getY()] <= 0) {
-                makeNode(new Point(p.getX() - 1, p.getY()), parent);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            try {
-                if (grid[p.getX() + grid.length - 1][p.getY()] <= 0) {
-                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
-                }
-            } catch (ArrayIndexOutOfBoundsException ex) {
-
-            }
+        if(grid[modNumber(p.getX() - 1,grid.length)][p.getY()] <= counter){
+            makeNode(new Point(modNumber(p.getX() - 1,grid.length), p.getY()), parent);
         }
-        try {
-            if (grid[p.getX()][p.getY() + 1] <= 0) {
-                makeNode(new Point(p.getX(), p.getY() + 1), parent);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            try {
-                if (grid[p.getX()][p.getY() - grid[0].length + 1] <= 0) {
-                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
-                }
-            } catch (ArrayIndexOutOfBoundsException ex) {
-
-            }
+        if(grid[p.getX()][modNumber(p.getY() + 1,grid[0].length)] <= counter){
+            makeNode(new Point(p.getX(), modNumber(p.getY() + 1,grid[0].length)), parent);
         }
-        try {
-            if (grid[p.getX()][p.getY() - 1] <= 0) {
-                makeNode(new Point(p.getX(), p.getY() - 1), parent);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            try {
-                if (grid[p.getX()][p.getY() + grid[0].length - 1] <= 0) {
-                    makeNode(new Point(p.getX() + 1, p.getY()), parent);
-                }
-            } catch (ArrayIndexOutOfBoundsException ex) {
-
-            }
+        if(grid[p.getX()][modNumber(p.getY() - 1,grid[0].length)] <= counter){
+            makeNode(new Point(p.getX(), modNumber(p.getY() - 1,grid[0].length)), parent);
         }
     }
-
+    public int modNumber(int a, int mod){
+        return (a+mod) % mod;
+    }
     public void pathFind() {
-
-        int counter = 0;
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
-                if (grid[i][j] == -2) {
-                    
+                if (grid[i][j] == 1) {
                     start = new Point(i,j);
                 } else if (grid[i][j] == -1) {
                     target = new Point(i,j);
