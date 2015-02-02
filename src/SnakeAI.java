@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,22 +15,24 @@ public class SnakeAI {
     public static SnakeAI CurrentAI;
     private int[][] grid;
     private int counter = 1;
+    private boolean left = true;
     public static void main(String[] args) {
         //Testing Code
         int[][] grid = 
-        {{10, 11, 12, 13, 0},
-        {9, 0, 2, 1, 0},
-        {8, -1, 3, 0, 0},
-        {7, 0, 4, 5, 6},
-        {0, 0, 0, 0, 0}
+        {{  10,     11,    12,      13,     0},
+        {   9,      0,      2,      1,      0},
+        {   8,      -1,     3,      0,      0},
+        {   7,      0,      4,      5,      6},
+        {   0,      0,      0,      0,      0}
         };
         int[][] out = {{0, 0, 0, 0, 0},
         {0, 0, 0, 1, 0},
         {0, -1, 0, 0, 0},
         {0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0}
-        };;
+        };
         CurrentAI = new SnakeAI(grid);
+        try{
         CurrentAI.pathFind();
         List<Node> thing = CurrentAI.reconstruct();
         for(Node n : thing){
@@ -40,8 +41,15 @@ public class SnakeAI {
         }
         for(int[] n : out){
             for(int m : n)
-                System.out.print(m + " ");
+                System.out.printf("%3d", m);
             System.out.println();
+        }
+        List<Direction> list = CurrentAI.findPath(thing);
+        for(Direction d : list){
+            System.out.println(d.name());
+        }
+        }catch(NoPathException e){
+            System.out.println("No Path!");
         }
     }
 
@@ -65,7 +73,7 @@ public class SnakeAI {
         }
         itr.add(thing);
     }
-    public Point getTarget() {
+    private Point getTarget() {
         return target;
     }
     private void makeNode(Point p, Node parent) {
@@ -78,7 +86,7 @@ public class SnakeAI {
             }
         }
     }
-    public void addSurround(Node parent) {
+    private void addSurround(Node parent) {
         Point p = parent.getPoint();
         if(grid[modNumber(p.getX() + 1,grid.length)][p.getY()] <= counter){
             makeNode(new Point(modNumber(p.getX() + 1,grid.length), p.getY()), parent);
@@ -96,7 +104,7 @@ public class SnakeAI {
     public int modNumber(int a, int mod){
         return (a+mod) % mod;
     }
-    public void pathFind() {
+    public void pathFind() throws NoPathException {
         for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
                 if (grid[i][j] == 1) {
@@ -109,22 +117,22 @@ public class SnakeAI {
         Node n = new Node(start, null);
         System.out.println("Started with " + n);
         openSet.add(n);
-        while (!openSet.isEmpty() && !checkDone()) {
+        while (true) {
             Node thing = openSet.get(0);
             addSurround(thing);
             openSet.remove(thing);
             closedSet.put(thing.self, thing);
-            System.out.println("Added " + thing + " to the closed set.");
+            if(checkDone())
+                break;
+            if(openSet.isEmpty())
+                throw new NoPathException();
         }
-        
-
     }
-
     public boolean checkDone() {
         return closedSet.containsKey(target);
     }
-
-    public LinkedList<Node> reconstruct() {
+    
+     private LinkedList<Node> reconstruct() {
         LinkedList<Node> toSender = new LinkedList<>();
         toSender.add(closedSet.get(target));
         while (true) {
@@ -136,9 +144,64 @@ public class SnakeAI {
         }
         return toSender;
     }
-
+     private LinkedList<Node> reconstruct(Node end) {
+        LinkedList<Node> toSender = new LinkedList<>();
+        toSender.add(end);
+        while (true) {
+            Node process = toSender.get(0);
+            if (process.parent.equals(start)) {
+                break;
+            }
+            toSender.add(0, closedSet.get(process.parent));
+        }
+        return toSender;
+    }
+     public List<Direction> findPath(List<Node> path){
+         Node prev = path.remove(0);
+         List<Direction> total = new LinkedList<Direction>();
+         while(!path.isEmpty()){
+             Node curr = path.remove(0);
+             total.add(curr.self.subtract(prev.self));
+         }
+         return total;
+     }
+     public Direction stall(){
+        int right = left ? -1 : 1;
+        if(grid[modNumber(target.getX() + 1,grid.length)][target.getY()] == 2){
+            if(grid[target.getX()][modNumber(target.getY() + right,grid[0].length)] == 0){
+                return Direction.UP;
+            }
+            if(grid[target.getX()][modNumber(target.getY() - right,grid[0].length)] == 0){
+                return Direction.DOWN;
+            }
+        }
+        else if(grid[modNumber(target.getX() - 1,grid.length)][target.getY()] == 2){
+            if(grid[target.getX()][modNumber(target.getY() - right,grid[0].length)] == 0){
+                return Direction.DOWN;
+            }
+            if(grid[target.getX()][modNumber(target.getY() + right,grid[0].length)] == 0){
+                return Direction.UP;
+            }
+        }
+        else if(grid[target.getX()][modNumber(target.getY() + 1,grid[0].length)] == 2){
+            if(grid[modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
+                return Direction.RIGHT;
+            }
+            else if(grid[modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
+                return Direction.LEFT;
+            }
+        }
+        else if(grid[target.getX()][modNumber(target.getY() - 1,grid[0].length)] == 2){
+            if(grid[modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
+                return Direction.LEFT;
+            }
+            else if(grid[modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
+                return Direction.RIGHT;
+            }
+        }
+        return null; //If you got here, something's wrong.
+     }
     class Node {
-
         private Point parent;
         private final Point self;
         private int gScore;
@@ -248,8 +311,18 @@ public class SnakeAI {
         public String toString() {
             return "(" + x + "," + y + ")";
         }
+        public Direction subtract(Point p){
+            if(p.getX() - this.getX() == 1)
+                return Direction.RIGHT;
+            if(p.getX() - this.getX() == -1)
+                return Direction.LEFT;
+            if(p.getY() - this.getY() == 1)
+                return Direction.UP;
+            if(p.getY() - this.getY() == -1)
+                return Direction.DOWN;
+            return null;//Not Supposed to get here.
+        }
     }
-
     static class AlreadyInListException extends Exception {
 
         Node already;
