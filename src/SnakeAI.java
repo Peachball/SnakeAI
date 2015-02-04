@@ -131,7 +131,19 @@ public class SnakeAI {
     public boolean checkDone() {
         return closedSet.containsKey(target);
     }
-    
+    public LinkedList<Direction> AStar() throws NoPathException{
+            pathFind();
+            List<Node> nodes = reconstruct();
+            LinkedList<Direction> directions = new LinkedList<Direction>();
+            Node n = nodes.remove(0);
+            Node m;
+            while(!nodes.isEmpty()){
+                m = nodes.remove(0);
+                directions.add(n.self.subtract(m.self));
+                n = m;
+            }
+            return directions;
+    }
      private LinkedList<Node> reconstruct() {
         LinkedList<Node> toSender = new LinkedList<>();
         toSender.add(closedSet.get(target));
