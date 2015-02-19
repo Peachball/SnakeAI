@@ -67,7 +67,7 @@ public class Point {
             return null; //HOW DID YOU GET HERE. HOW.
         }
         public Point modDimentions(int x, int y){
-            return new Point(SnakeAI.modNumber(this.x, x),SnakeAI.modNumber(this.y, y));
+            return new Point(Grid.modNumber(this.x, x),Grid.modNumber(this.y, y));
         }
         public static int getVal(int[][] grid, Point p){
             return grid[p.getX()][p.getY()];

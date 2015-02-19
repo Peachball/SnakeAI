@@ -88,21 +88,18 @@ public class SnakeAI {
     }
     private void addSurround(Node parent) {
         Point p = parent.getPoint();
-        if(grid[modNumber(p.getX() + 1,grid.length)][p.getY()] <= counter){
-            makeNode(new Point(modNumber(p.getX() + 1,grid.length), p.getY()), parent);
+        if(grid[Grid.modNumber(p.getX() + 1,grid.length)][p.getY()] <= counter){
+            makeNode(new Point(Grid.modNumber(p.getX() + 1,grid.length), p.getY()), parent);
         }
-        if(grid[modNumber(p.getX() - 1,grid.length)][p.getY()] <= counter){
-            makeNode(new Point(modNumber(p.getX() - 1,grid.length), p.getY()), parent);
+        if(grid[Grid.modNumber(p.getX() - 1,grid.length)][p.getY()] <= counter){
+            makeNode(new Point(Grid.modNumber(p.getX() - 1,grid.length), p.getY()), parent);
         }
-        if(grid[p.getX()][modNumber(p.getY() + 1,grid[0].length)] <= counter){
-            makeNode(new Point(p.getX(), modNumber(p.getY() + 1,grid[0].length)), parent);
+        if(grid[p.getX()][Grid.modNumber(p.getY() + 1,grid[0].length)] <= counter){
+            makeNode(new Point(p.getX(), Grid.modNumber(p.getY() + 1,grid[0].length)), parent);
         }
-        if(grid[p.getX()][modNumber(p.getY() - 1,grid[0].length)] <= counter){
-            makeNode(new Point(p.getX(), modNumber(p.getY() - 1,grid[0].length)), parent);
+        if(grid[p.getX()][Grid.modNumber(p.getY() - 1,grid[0].length)] <= counter){
+            makeNode(new Point(p.getX(), Grid.modNumber(p.getY() - 1,grid[0].length)), parent);
         }
-    }
-    public int modNumber(int a, int mod){
-        return (a+mod) % mod;
     }
     public void pathFind() throws NoPathException {
         for (int i = 0; i < grid.length; i++) {
@@ -179,35 +176,35 @@ public class SnakeAI {
      }
      public Direction stall(){
         int right = left ? -1 : 1;
-        if(grid[modNumber(target.getX() + 1,grid.length)][target.getY()] == 2){
-            if(grid[target.getX()][modNumber(target.getY() + right,grid[0].length)] == 0){
+        if(grid[Grid.modNumber(target.getX() + 1,grid.length)][target.getY()] == 2){
+            if(grid[target.getX()][Grid.modNumber(target.getY() + right,grid[0].length)] == 0){
                 return Direction.UP;
             }
-            if(grid[target.getX()][modNumber(target.getY() - right,grid[0].length)] == 0){
+            if(grid[target.getX()][Grid.modNumber(target.getY() - right,grid[0].length)] == 0){
                 return Direction.DOWN;
             }
         }
-        else if(grid[modNumber(target.getX() - 1,grid.length)][target.getY()] == 2){
-            if(grid[target.getX()][modNumber(target.getY() - right,grid[0].length)] == 0){
+        else if(grid[Grid.modNumber(target.getX() - 1,grid.length)][target.getY()] == 2){
+            if(grid[target.getX()][Grid.modNumber(target.getY() - right,grid[0].length)] == 0){
                 return Direction.DOWN;
             }
-            if(grid[target.getX()][modNumber(target.getY() + right,grid[0].length)] == 0){
+            if(grid[target.getX()][Grid.modNumber(target.getY() + right,grid[0].length)] == 0){
                 return Direction.UP;
             }
         }
-        else if(grid[target.getX()][modNumber(target.getY() + 1,grid[0].length)] == 2){
-            if(grid[modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
+        else if(grid[target.getX()][Grid.modNumber(target.getY() + 1,grid[0].length)] == 2){
+            if(grid[Grid.modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
                 return Direction.RIGHT;
             }
-            else if(grid[modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
+            else if(grid[Grid.modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
                 return Direction.LEFT;
             }
         }
-        else if(grid[target.getX()][modNumber(target.getY() - 1,grid[0].length)] == 2){
-            if(grid[modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
+        else if(grid[target.getX()][Grid.modNumber(target.getY() - 1,grid[0].length)] == 2){
+            if(grid[Grid.modNumber(target.getX() - right,grid.length)][target.getY()] == 0){
                 return Direction.LEFT;
             }
-            else if(grid[modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
+            else if(grid[Grid.modNumber(target.getX() + right,grid.length)][target.getY()] == 0){
                 return Direction.RIGHT;
             }
         }
