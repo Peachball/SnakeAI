@@ -10,10 +10,6 @@ public class SnakePart implements Tile{
      */
     private Point parent;
     /**
-     * this long represents the number of turns it will take this to expire.
-     */
-    private long expireTurn;
-    /**
      * setChild sets the parent only if the current child is not set.
      * @param parent The parent to be set.
      */

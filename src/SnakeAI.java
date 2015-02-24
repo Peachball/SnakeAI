@@ -3,18 +3,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-
+/**
+ * This class 
+ * @author Benjamin
+ */
 public class SnakeAI {
 
     private Point target;
     private Point start;
-    private List<Node> openSet;
+    private LinkedList<Node> openSet;
     private Map<Point, Node> closedSet;
     public static final int apple = -1;
     public static final int snakeHead = 1;
     public static SnakeAI CurrentAI;
     private int[][] grid;
-    private int counter = 1;
+    private int counter = 0;
     private boolean left = true;
     public static void main(String[] args) {
         //Testing Code
@@ -31,34 +34,36 @@ public class SnakeAI {
         {0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0}
         };
-        CurrentAI = new SnakeAI(grid);
+        CurrentAI = new SnakeAI(grid, new Point(1,3) , new Point(2,1));
         try{
         CurrentAI.pathFind();
         List<Node> thing = CurrentAI.reconstruct();
         for(Node n : thing){
             out[n.self.x][n.self.y] = 3;
-            System.out.println(n.self);
+            //System.out.println(n.self);
         }
-        for(int[] n : out){
+        /*for(int[] n : out){
             for(int m : n)
                 System.out.printf("%3d", m);
             System.out.println();
-        }
-        List<Direction> list = CurrentAI.findPath(thing);
-        for(Direction d : list){
+        }*/
+        List<Direction> list = CurrentAI.findPath((LinkedList)thing);
+        //System.out.println(list.toString());
+        /*for(Direction d : list){
             System.out.println(d.name());
-        }
+        }*/
         }catch(NoPathException e){
             System.out.println("No Path!");
         }
     }
 
-    public SnakeAI(int[][] grid/*, int snakeLength*/) {
+    public SnakeAI(int[][] grid, Point snakeStart, Point apple) {
         openSet = new LinkedList<Node>();
         closedSet = new HashMap<Point, Node>();
         this.grid = grid;
+        start = snakeStart;
+        target = apple;
     }
-
     private static void insert(List<Node> a, Node thing) throws AlreadyInListException {
         ListIterator itr = a.listIterator();
         while (itr.hasNext()) {
@@ -78,7 +83,7 @@ public class SnakeAI {
     }
     private void makeNode(Point p, Node parent) {
         if (!closedSet.containsKey(p)) {
-            Node process = new Node(p, parent);
+            Node process = new Node(p, parent, target);
             try {
                 insert(openSet, process);
             } catch (AlreadyInListException e) {
@@ -94,7 +99,7 @@ public class SnakeAI {
         if(grid[Grid.modNumber(p.getX() - 1,grid.length)][p.getY()] <= counter){
             makeNode(new Point(Grid.modNumber(p.getX() - 1,grid.length), p.getY()), parent);
         }
-        if(grid[p.getX()][Grid.modNumber(p.getY() + 1,grid[0].length)] <= counter){
+        if(grid[p.getX()][Grid.modNumber(p.getY() + 1,grid.length)] <= counter){
             makeNode(new Point(p.getX(), Grid.modNumber(p.getY() + 1,grid[0].length)), parent);
         }
         if(grid[p.getX()][Grid.modNumber(p.getY() - 1,grid[0].length)] <= counter){
@@ -102,7 +107,7 @@ public class SnakeAI {
         }
     }
     public void pathFind() throws NoPathException {
-        for (int i = 0; i < grid.length; i++) {
+        /*for (int i = 0; i < grid.length; i++) {
             for (int j = 0; j < grid.length; j++) {
                 if (grid[i][j] == 1) {
                     start = new Point(i,j);
@@ -110,14 +115,13 @@ public class SnakeAI {
                     target = new Point(i,j);
                 }
             }
-        }
-        Node n = new Node(start, null);
+        }*/
+        Node n = new Node(start, null, target);
         System.out.println("Started with " + n);
         openSet.add(n);
-        while (true) {
-            Node thing = openSet.get(0);
+        while (true) {//Replace with do/while loop
+            Node thing = openSet.removeFirst();
             addSurround(thing);
-            openSet.remove(thing);
             closedSet.put(thing.self, thing);
             if(checkDone())
                 break;
@@ -130,14 +134,15 @@ public class SnakeAI {
     }
     public LinkedList<Direction> AStar() throws NoPathException{
             pathFind();
-            List<Node> nodes = reconstruct();
+            LinkedList<Node> nodes = reconstruct();
+            System.out.println(nodes);
+            System.out.println("Target : " + target);
+            System.out.println("start : " + start);
             LinkedList<Direction> directions = new LinkedList<Direction>();
-            Node n = nodes.remove(0);
-            Node m;
+            Node n;
             while(!nodes.isEmpty()){
-                m = nodes.remove(0);
-                directions.add(n.self.subtract(m.self));
-                n = m;
+                n = nodes.removeFirst();
+                directions.add(n.parent.subtract(n.self, grid.length, grid[0].length));
             }
             return directions;
     }
@@ -165,12 +170,13 @@ public class SnakeAI {
         }
         return toSender;
     }
-     public List<Direction> findPath(List<Node> path){
-         Node prev = path.remove(0);
-         List<Direction> total = new LinkedList<Direction>();
+     public LinkedList<Direction> findPath(LinkedList<Node> path){
+         Node prev = path.removeFirst();
+         LinkedList<Direction> total = new LinkedList<Direction>();
          while(!path.isEmpty()){
              Node curr = path.remove(0);
-             total.add(curr.self.subtract(prev.self));
+             total.add(curr.self.subtract(prev.self, grid.length, grid[0].length));
+             prev = curr;
          }
          return total;
      }
@@ -216,7 +222,7 @@ public class SnakeAI {
         private int gScore;
         private final int hScore;
 
-        public Node(Point loc, Node parent) {
+        public Node(Point loc, Node parent, Point target) {
             this.self = loc;
             if (parent != null) {
                 this.parent = parent.getPoint();
@@ -225,7 +231,7 @@ public class SnakeAI {
                 this.parent = null;
                 this.gScore = 1;
             }
-            this.hScore = Math.abs(SnakeAI.CurrentAI.getTarget().getX() - loc.getX() + SnakeAI.CurrentAI.getTarget().getX() - loc.getY());
+            this.hScore = Math.abs(target.getX() - loc.getX()) + Math.abs(target.getY() - loc.getY());
         }
 
         public Node(int x, int y, Node parent) {
@@ -247,15 +253,14 @@ public class SnakeAI {
         public int gScore() {
             return gScore;
         }
-
-        public int[] getCoord() {
-            return self.getCoord();
-        }
-
+        
         public Point getPoint() {
             return self;
         }
-
+        /**
+         * Returns the string representation of the Node
+         * @return String representation of the node
+         */
         @Override
         public String toString() {
             return self + " has parent of " + parent + " with gScore " + gScore + " with hScore " + hScore;
@@ -265,7 +270,7 @@ public class SnakeAI {
             if (n.gScore + 1 < gScore()) {
                 gScore = n.fScore() + 1;
                 parent = n.getPoint();
-                System.out.println("Changing " + self + "'s parent to " + n.getPoint());
+                //System.out.println("Changing " + self + "'s parent to " + n.getPoint());
                 return true;
             }
             return false;
@@ -281,57 +286,6 @@ public class SnakeAI {
         }
     }
 
-    class Point {
-
-        private int x, y;
-
-        public Point(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        public int[] getCoord() {
-            return new int[]{x, y};
-        }
-
-        @Override
-        public boolean equals(Object otherPoint) {
-            if (otherPoint instanceof Point) {
-                int[] targ = ((Point) otherPoint).getCoord();
-                return x == targ[0] && y == targ[1];
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return (x * y + y + x) % Integer.MAX_VALUE;
-        }
-
-        @Override
-        public String toString() {
-            return "(" + x + "," + y + ")";
-        }
-        public Direction subtract(Point p){
-            if(p.getX() - this.getX() == 1)
-                return Direction.RIGHT;
-            if(p.getX() - this.getX() == -1)
-                return Direction.LEFT;
-            if(p.getY() - this.getY() == 1)
-                return Direction.UP;
-            if(p.getY() - this.getY() == -1)
-                return Direction.DOWN;
-            return null;//Not Supposed to get here.
-        }
-    }
     static class AlreadyInListException extends Exception {
 
         Node already;

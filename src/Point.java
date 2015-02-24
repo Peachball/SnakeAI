@@ -1,11 +1,11 @@
 
 /**
- *
+ *This class stores integer coordinates for the snake game.
  * @author Benjamin
  */
 public class Point {
 
-        private int x, y;
+        public int x, y;
 
         public Point(int x, int y) {
             this.x = x;
@@ -19,16 +19,10 @@ public class Point {
         public int getY() {
             return y;
         }
-
-        public int[] getCoord() {
-            return new int[]{x, y};
-        }
-
         @Override
         public boolean equals(Object otherPoint) {
             if (otherPoint instanceof Point) {
-                int[] targ = ((Point) otherPoint).getCoord();
-                return x == targ[0] && y == targ[1];
+                return x == ((Point)otherPoint).getX() && y == ((Point)otherPoint).getY();
             }
             return false;
         }
@@ -42,14 +36,14 @@ public class Point {
         public String toString() {
             return "(" + x + "," + y + ")";
         }
-        public Direction subtract(Point p){
-            if(p.getX() - this.getX() == 1)
+        public Direction subtract(Point p, int xLim, int yLim){
+            if(Grid.modNumber(p.getX() - this.getX(), xLim) == 1)
                 return Direction.RIGHT;
-            if(p.getX() - this.getX() == -1)
+            if(Grid.modNumber(p.getX() - this.getX(), xLim) == xLim - 1)
                 return Direction.LEFT;
-            if(p.getY() - this.getY() == 1)
+            if(Grid.modNumber(p.getY() - this.getY(), yLim) == 1)
                 return Direction.UP;
-            if(p.getY() - this.getY() == -1)
+            if(Grid.modNumber(p.getY() - this.getY(), yLim) == yLim - 1)
                 return Direction.DOWN;
             return null;//Not Supposed to get here.
         }
@@ -65,11 +59,5 @@ public class Point {
                     return new Point(this.x, this.y - 1);
             }
             return null; //HOW DID YOU GET HERE. HOW.
-        }
-        public Point modDimentions(int x, int y){
-            return new Point(Grid.modNumber(this.x, x),Grid.modNumber(this.y, y));
-        }
-        public static int getVal(int[][] grid, Point p){
-            return grid[p.getX()][p.getY()];
         }
     }
