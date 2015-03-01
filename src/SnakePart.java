@@ -1,7 +1,7 @@
 
 /**
  * This class is here to be able to efficiently iterate snakes without needing to search through an entire grid.
- * A more detailed explanation can be found in the Grid class.
+ * A more detailed explanation can be found in the foreward.
  * @author Benjamin
  */
 public class SnakePart implements Tile{
