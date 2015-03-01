@@ -2,7 +2,7 @@
 import java.util.Random;
 
 /**
- * The Grid class stores the game logic and the
+ * The Grid class stores the game logic.
  *
  * @author Benjamin
  */
@@ -143,7 +143,7 @@ public class Grid {
     }
 
     public void die() {
-        //die(); //haha
+        //die(); //haha //why did I put this here.
         System.out.println("You died!");
         System.exit(0);
     }
