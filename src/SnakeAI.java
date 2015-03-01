@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 /**
- * This class 
+ * This class implements A* for snake.
  * @author Benjamin
  */
 public class SnakeAI {
@@ -19,43 +19,6 @@ public class SnakeAI {
     private int[][] grid;
     private int counter = 0;
     private boolean left = true;
-    public static void main(String[] args) {
-        //Testing Code
-        int[][] grid = 
-        {{  10,     11,    12,      13,     0},
-        {   9,      0,      2,      1,      0},
-        {   8,      -1,     3,      0,      0},
-        {   7,      0,      4,      5,      6},
-        {   0,      0,      0,      0,      0}
-        };
-        int[][] out = {{0, 0, 0, 0, 0},
-        {0, 0, 0, 1, 0},
-        {0, -1, 0, 0, 0},
-        {0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0}
-        };
-        CurrentAI = new SnakeAI(grid, new Point(1,3) , new Point(2,1));
-        try{
-        CurrentAI.pathFind();
-        List<Node> thing = CurrentAI.reconstruct();
-        for(Node n : thing){
-            out[n.self.x][n.self.y] = 3;
-            //System.out.println(n.self);
-        }
-        /*for(int[] n : out){
-            for(int m : n)
-                System.out.printf("%3d", m);
-            System.out.println();
-        }*/
-        List<Direction> list = CurrentAI.findPath((LinkedList)thing);
-        //System.out.println(list.toString());
-        /*for(Direction d : list){
-            System.out.println(d.name());
-        }*/
-        }catch(NoPathException e){
-            System.out.println("No Path!");
-        }
-    }
 
     public SnakeAI(int[][] grid, Point snakeStart, Point apple) {
         openSet = new LinkedList<Node>();
@@ -107,17 +70,7 @@ public class SnakeAI {
         }
     }
     public void pathFind() throws NoPathException {
-        /*for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid.length; j++) {
-                if (grid[i][j] == 1) {
-                    start = new Point(i,j);
-                } else if (grid[i][j] == -1) {
-                    target = new Point(i,j);
-                }
-            }
-        }*/
         Node n = new Node(start, null, target);
-        System.out.println("Started with " + n);
         openSet.add(n);
         while (true) {//Replace with do/while loop
             Node thing = openSet.removeFirst();
@@ -135,9 +88,6 @@ public class SnakeAI {
     public LinkedList<Direction> AStar() throws NoPathException{
             pathFind();
             LinkedList<Node> nodes = reconstruct();
-            System.out.println(nodes);
-            System.out.println("Target : " + target);
-            System.out.println("start : " + start);
             LinkedList<Direction> directions = new LinkedList<Direction>();
             Node n;
             while(!nodes.isEmpty()){
@@ -270,7 +220,6 @@ public class SnakeAI {
             if (n.gScore + 1 < gScore()) {
                 gScore = n.fScore() + 1;
                 parent = n.getPoint();
-                //System.out.println("Changing " + self + "'s parent to " + n.getPoint());
                 return true;
             }
             return false;
