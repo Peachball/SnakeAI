@@ -7,7 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class wraps together the game logic, graphics, and the AI.
  * @author Benjamin
  */
 public class SnakeGame {
@@ -37,28 +37,7 @@ public class SnakeGame {
                 System.out.println("Not Valid!");
             }
         }
-        System.out.println("custom seed? (Type none for none)");
-        while (true) {
-            try {
-                String s = scn.nextLine();
-                if (s.equalsIgnoreCase("none")) {
-                    seed = new Random().nextLong();
-                } else {
-                    seed = Integer.parseInt(scn.nextLine());
-                }
-                break;
-            } catch (NumberFormatException e) {
-                System.out.println("Not Valid!");
-            }
-        }
         init(x,y);
-        /*while(true){
-            if(false)
-                break;
-            playGame(100, Direction.valueOf(scn.nextLine()));
-        }*/
-        /*test();
-        playGame(100, Direction.UP);*/
         while (true) {
             SnakeAI ai = new SnakeAI(game.createMap(), game.SnakeStart, game.apple);
             try {
@@ -77,7 +56,7 @@ public class SnakeGame {
             playGame(100, Direction.RIGHT);
     }
     public static void init(int x, int y){
-        game = new Grid(x, y, new Random().nextLong()); //Add randome seed later.
+        game = new Grid(x, y, new Random().nextLong());
         StdDraw.setXscale(0, x);
         StdDraw.setYscale(0, y);
         StdDraw.setPenColor(StdDraw.WHITE);
