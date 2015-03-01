@@ -43,10 +43,10 @@ public class SnakeGame {
             try {
                 List<Direction> thing = ai.AStar();
                 //System.out.println(thing);
-                playGame(0, thing);
+                playGame(10, thing);
             } catch (NoPathException ex) {
                 System.out.println("Derp");
-                playGame(1000, Direction.UP);
+                playGame(10, Direction.UP);
             }
         }
     }
