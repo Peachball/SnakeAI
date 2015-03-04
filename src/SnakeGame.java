@@ -16,10 +16,10 @@ public class SnakeGame {
     private static Point oldHead;
     public static void main(String[] args) {
         Scanner scn = new Scanner(System.in);
-        int x, y;
+        int x, ms;
         long seed;
 
-        System.out.println("Size of grid x?");
+        System.out.println("Size of grid?");
         while (true) {
             try {
                 x = Integer.parseInt(scn.nextLine());
@@ -28,25 +28,24 @@ public class SnakeGame {
                 System.out.println("Not Valid!");
             }
         }
-        System.out.println("Size of grid y?");
+        System.out.println("Milliseconds to wait between frames?");
         while (true) {
             try {
-                y = Integer.parseInt(scn.nextLine());
+                ms = Integer.parseInt(scn.nextLine());
                 break;
             } catch (NumberFormatException e) {
                 System.out.println("Not Valid!");
             }
         }
-        init(x,y);
+        init(x);
         while (true) {
             SnakeAI ai = new SnakeAI(game.createMap(), game.SnakeStart, game.apple);
             try {
                 List<Direction> thing = ai.AStar();
                 //System.out.println(thing);
-                playGame(10, thing);
+                playGame(ms, thing);
             } catch (NoPathException ex) {
-                System.out.println("Derp");
-                playGame(10, Direction.UP);
+                playGame(ms,game.stall());
             }
         }
     }
@@ -55,12 +54,12 @@ public class SnakeGame {
             playGame(100, Direction.UP);
             playGame(100, Direction.RIGHT);
     }
-    public static void init(int x, int y){
-        game = new Grid(x, y, new Random().nextLong());
+    public static void init(int x){
+        game = new Grid(x, x, new Random().nextLong());
         StdDraw.setXscale(0, x);
-        StdDraw.setYscale(0, y);
+        StdDraw.setYscale(0, x);
         StdDraw.setPenColor(StdDraw.WHITE);
-        StdDraw.filledRectangle(x / 2, y / 2, x / 2, y / 2);
+        StdDraw.filledRectangle(x / 2, x / 2, x / 2, x / 2);
         oldHead = game.SnakeStart;
     }
 
@@ -103,7 +102,7 @@ public class SnakeGame {
                 StdDraw.setPenColor(StdDraw.PINK);// Snake Head color
                 break;
         }
-        StdDraw.filledRectangle(x, y, .45, .45);
+        StdDraw.filledRectangle(x, y, (status == 0) ? .6 : .45, (status == 0) ? .6 : .45);
     }
 
     public static void fillRectangle(Point p, int status) {

@@ -46,15 +46,18 @@ public class Grid {
 
     private void startGame() {
         genApple();
-        int x = random.nextInt(grid.length - 2);
+        int x = random.nextInt(grid.length - 3);
         int y = random.nextInt(grid[0].length - 1);
         grid[x][y] = new SnakePart(null);
         SnakeStart = new Point(x, y);
-        SnakeEnd = new Point(x, y);
+        grid[x+1][y] = new SnakePart(SnakeStart);
+        grid[x+2][y] = new SnakePart(new Point(x+1, y));
+        SnakeEnd = new Point(x+2, y);
     }
 
     public void move(Direction dir) {
         if (!checkOpposite(dir, currDirection)) {
+            move();
             return;
         }
         Point newSnakeStart = modPoint(SnakeStart.add(dir));
@@ -86,12 +89,24 @@ public class Grid {
             move(currDirection);
         }
     }
-
+    public Direction stall(){
+        Direction checkDirection = currDirection;
+        for(int i = 0; i < 4; i++){
+            if(get(SnakeStart.add(checkDirection)) instanceof SnakePart){
+                checkDirection = checkDirection.next();
+            }else{
+                return checkDirection;
+            }
+        }
+        return Direction.UP;//It doesn't matter what we return here because we're completely surroudned.
+    }
     public Tile get(Point p) {
+        p = modPoint(p);
         return grid[p.getX()][p.getY()];
     }
 
     public void set(Point p, Tile t) {
+        p = modPoint(p);
         grid[p.getX()][p.getY()] = t;
     }
 
