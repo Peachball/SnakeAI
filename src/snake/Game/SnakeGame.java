@@ -1,10 +1,13 @@
+package snake.Game;
 
-import java.util.LinkedList;
+
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import snake.Common.*;
+import snake.AI.*;
 
 /**
  * This class wraps together the game logic, graphics, and the AI.
@@ -18,7 +21,6 @@ public class SnakeGame {
         Scanner scn = new Scanner(System.in);
         int x, ms;
         long seed;
-
         System.out.println("Size of grid?");
         while (true) {
             try {

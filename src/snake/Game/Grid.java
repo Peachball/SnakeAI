@@ -1,5 +1,8 @@
+package snake.Game;
+
 
 import java.util.Random;
+import snake.Common.*;
 
 /**
  * The Grid class stores the game logic.
@@ -19,6 +22,7 @@ public class Grid {
     public Point SnakeEnd;
     private Direction currDirection;
     public boolean appled;
+    private long snakeLength;
 
     public Grid(int x, int y) {
         grid = new Tile[x][y];
@@ -42,6 +46,7 @@ public class Grid {
         }else{
             genApple();
         }
+        snakeLength++;
     }
 
     private void startGame() {
@@ -160,6 +165,7 @@ public class Grid {
     public void die() {
         //die(); //haha //why did I put this here.
         System.out.println("You died!");
+        System.out.println("You got up to length: " + snakeLength);
         System.exit(0);
     }
 }

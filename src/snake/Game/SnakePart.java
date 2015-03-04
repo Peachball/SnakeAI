@@ -1,3 +1,6 @@
+package snake.Game;
+
+import snake.Common.*;
 
 /**
  * This class is here to be able to efficiently iterate snakes without needing to search through an entire grid.
