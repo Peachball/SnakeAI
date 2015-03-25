@@ -1,3 +1,5 @@
+package snake.Common;
+
 /**
  * Enum for directions
  * */

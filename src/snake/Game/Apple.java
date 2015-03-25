@@ -1,3 +1,5 @@
+package snake.Game;
+
 
 /**
  * This class represents the apple. Yay for empty classes.

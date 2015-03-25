@@ -1,3 +1,7 @@
+package snake.Common;
+
+import snake.Game.Grid;
+
 
 /**
  *This class stores integer coordinates for the snake game.

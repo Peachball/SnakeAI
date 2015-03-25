@@ -1,8 +1,13 @@
+package snake.AI;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import snake.Common.Direction;
+import snake.Common.Point;
+import snake.Game.Grid;
 /**
  * This class implements A* for snake.
  * @author Benjamin

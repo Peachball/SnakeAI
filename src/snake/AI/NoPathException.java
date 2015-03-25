@@ -1,4 +1,6 @@
-/**
+package snake.AI;
+
+/*
  * This exception is thrown when A* cannot find a path.
  * @author Benjamin Yin
  */

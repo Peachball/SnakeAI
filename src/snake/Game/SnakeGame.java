@@ -1,6 +1,5 @@
 package snake.Game;
 
-
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -11,12 +10,14 @@ import snake.AI.*;
 
 /**
  * This class wraps together the game logic, graphics, and the AI.
+ *
  * @author Benjamin
  */
 public class SnakeGame {
 
     private static Grid game;
     private static Point oldHead;
+
     public static void main(String[] args) {
         Scanner scn = new Scanner(System.in);
         int x, ms;
@@ -47,16 +48,17 @@ public class SnakeGame {
                 //System.out.println(thing);
                 playGame(ms, thing);
             } catch (NoPathException ex) {
-                playGame(ms,game.stall());
+                playGame(ms, game.stall());
             }
         }
     }
 
     public static void test() {
-            playGame(100, Direction.UP);
-            playGame(100, Direction.RIGHT);
+        playGame(100, Direction.UP);
+        playGame(100, Direction.RIGHT);
     }
-    public static void init(int x){
+
+    public static void init(int x) {
         game = new Grid(x, x, new Random().nextLong());
         StdDraw.setXscale(0, x);
         StdDraw.setYscale(0, x);
@@ -70,11 +72,11 @@ public class SnakeGame {
         if (game.appled) {
             game.appled = false;
             fillRectangle(game.apple, -1);
-        }else{
+        } else {
             fillRectangle(game.SnakeEnd, 0);
         }
         fillRectangle(game.SnakeStart, 2);
-        fillRectangle(game.SnakePrevStart,1);
+        fillRectangle(game.SnakePrevStart, 1);
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException ex) {

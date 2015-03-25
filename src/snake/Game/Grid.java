@@ -1,6 +1,5 @@
 package snake.Game;
 
-
 import java.util.Random;
 import snake.Common.*;
 
@@ -16,7 +15,8 @@ public class Grid {
     public Point apple;
     public Point SnakeStart;
     /**
-     * this is a helper for the graphics portion, so that the graphics engine knows which square to mark black
+     * this is a helper for the graphics portion, so that the graphics engine
+     * knows which square to mark black
      */
     public Point SnakePrevStart;
     public Point SnakeEnd;
@@ -39,11 +39,11 @@ public class Grid {
     private void genApple() {
         int x = random.nextInt(grid.length);
         int y = random.nextInt(grid[0].length);
-        if(grid[x][y] == null){
+        if (grid[x][y] == null) {
             grid[x][y] = new Apple();
             apple = new Point(x, y);
             appled = true;
-        }else{
+        } else {
             genApple();
         }
         snakeLength++;
@@ -55,9 +55,9 @@ public class Grid {
         int y = random.nextInt(grid[0].length - 1);
         grid[x][y] = new SnakePart(null);
         SnakeStart = new Point(x, y);
-        grid[x+1][y] = new SnakePart(SnakeStart);
-        grid[x+2][y] = new SnakePart(new Point(x+1, y));
-        SnakeEnd = new Point(x+2, y);
+        grid[x + 1][y] = new SnakePart(SnakeStart);
+        grid[x + 2][y] = new SnakePart(new Point(x + 1, y));
+        SnakeEnd = new Point(x + 2, y);
     }
 
     public void move(Direction dir) {
@@ -94,17 +94,19 @@ public class Grid {
             move(currDirection);
         }
     }
-    public Direction stall(){
+
+    public Direction stall() {
         Direction checkDirection = currDirection;
-        for(int i = 0; i < 4; i++){
-            if(get(SnakeStart.add(checkDirection)) instanceof SnakePart){
+        for (int i = 0; i < 4; i++) {
+            if (get(SnakeStart.add(checkDirection)) instanceof SnakePart) {
                 checkDirection = checkDirection.next();
-            }else{
+            } else {
                 return checkDirection;
             }
         }
         return Direction.UP;//It doesn't matter what we return here because we're completely surroudned.
     }
+
     public Tile get(Point p) {
         p = modPoint(p);
         return grid[p.getX()][p.getY()];
